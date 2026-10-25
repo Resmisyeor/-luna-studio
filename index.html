@@ -1,0 +1,3247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luna Studio</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Crect width='26' height='26' rx='6' fill='%230a1216'/%3E%3Cpath d='M16 3C10.5 4 7 8.6 7 14c0 6.1 4.9 11 11 11 2 0 3.9-.5 5.5-1.5C20 24.6 16.5 20.7 16.5 16c0-4.7 2.9-8.7 6.5-9.8C21.4 4.3 18.8 3.2 16 3Z' fill='%23f4cf8a'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#0a1216">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Plus+Jakarta+Sans:wght@200..800&family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&family=Courier+Prime:wght@400;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@400;700&family=Caveat:wght@500;600;700&display=swap');
+
+  :root{
+    --void: #14110c;
+    --ink: #1a1610;
+    --panel: #221c14;
+    --panel-2: #2a2318;
+    --line: #3c3324;
+    --silver: #efe4cd;
+    --silver-dim: #a8987a;
+    --accent: #bf4a3d;
+    --accent-dim: #5f342d;
+    --gold: #c8a15c;
+    --danger: #d9645a;
+    --ok: #82a86e;
+    --editor-font: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  body[data-theme="sakura"]{
+    --void:#1a1113; --ink:#211318; --panel:#2c1a1f; --panel-2:#341f26; --line:#452b31;
+    --silver:#f6e7e1; --silver-dim:#b9928e; --accent:#c9636e; --accent-dim:#6b3a3e;
+    --gold:#d9a26a; --danger:#e2645c; --ok:#8fae7f;
+  }
+  body[data-theme="forest"]{
+    --void:#0f1410; --ink:#141a15; --panel:#1c241c; --panel-2:#222c22; --line:#33402f;
+    --silver:#e8ecdc; --silver-dim:#93a68d; --accent:#749b58; --accent-dim:#41522e;
+    --gold:#c2a95a; --danger:#d9767a; --ok:#8fbf7f;
+  }
+  body[data-theme="parchment"]{
+    --void:#ece2c9; --ink:#e3d7b9; --panel:#f4ecd7; --panel-2:#e9dec0; --line:#cab98a;
+    --silver:#2c2414; --silver-dim:#6c5f42; --accent:#a03f2e; --accent-dim:#d8bd8e;
+    --gold:#886529; --danger:#a03f2e; --ok:#4f7a48;
+  }
+  body[data-theme="midnight"]{
+    --void:#0a0e1a; --ink:#0e1422; --panel:#141b2e; --panel-2:#1a2338; --line:#28324a;
+    --silver:#e4ebf5; --silver-dim:#8b98b8; --accent:#5b8fe0; --accent-dim:#33456e;
+    --gold:#e0c15b; --danger:#e0715b; --ok:#6ecf9a;
+  }
+  body[data-theme="amber"]{
+    --void:#160f08; --ink:#1d150c; --panel:#271c10; --panel-2:#302313; --line:#463319;
+    --silver:#f3e6ce; --silver-dim:#b39a6f; --accent:#e08a3c; --accent-dim:#6e4a20;
+    --gold:#f0b94f; --danger:#d9645a; --ok:#8fbf6a;
+  }
+
+  /* ============ QUIET / NO-MOTION MODE ============ */
+  body.no-motion,
+  body.no-motion *,
+  body.no-motion *::before,
+  body.no-motion *::after{
+    animation:none !important;
+    transition:none !important;
+    scroll-behavior:auto !important;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%; overscroll-behavior-x:none;}
+  body{
+    margin:0;
+    background:var(--void);
+    color:var(--silver);
+    font-family:'Plus Jakarta Sans', sans-serif;
+    overflow:hidden;
+    overscroll-behavior-x:none;
+    transition:background .2s, color .2s;
+  }
+  ::selection{ background:var(--accent-dim); color:var(--silver); }
+
+  .app{ display:flex; height:100vh; height:100dvh; }
+
+  .sidebar{
+    width:290px; min-width:290px;
+    background:var(--ink);
+    border-right:1px solid var(--line);
+    display:flex; flex-direction:column;
+    height:100vh; height:100dvh;
+    position:relative;
+    touch-action:pan-y;
+  }
+  .sidebar::before{
+    content:''; position:absolute; top:0; right:-1px; width:1px; height:100%;
+    background:linear-gradient(180deg, var(--accent-dim), transparent 60%);
+    opacity:.6;
+  }
+  .brand{
+    padding:18px 20px 14px;
+    border-bottom:1px solid var(--line);
+  }
+  .brand-row{ display:flex; align-items:center; gap:11px; }
+  .brand-icon{
+    flex-shrink:0; width:36px; height:36px; border-radius:3px;
+    background:linear-gradient(150deg, var(--panel-2), var(--panel));
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .brand-text{ display:flex; flex-direction:column; line-height:1.1; }
+  .brand-text .b1{
+    font-family:'Bricolage Grotesque', serif; font-weight:600; font-style:italic;
+    font-size:21px; letter-spacing:0.01em; color:var(--silver);
+  }
+  .brand-text .b2{
+    font-size:10px; letter-spacing:0.14em; color:var(--silver-dim); margin-top:2px;
+  }
+  .theme-row{ display:flex; align-items:center; gap:7px; margin-top:15px; flex-wrap:wrap; }
+  .theme-swatch{
+    width:19px; height:19px; border-radius:50%; cursor:pointer;
+    border:2px solid transparent; padding:0;
+  }
+  .theme-swatch.active{ border-color:var(--silver); }
+  .theme-swatch.t-luna{ background:linear-gradient(135deg,#bf4a3d,#14110c); }
+  .theme-swatch.t-sakura{ background:linear-gradient(135deg,#c9636e,#1a1113); }
+  .theme-swatch.t-forest{ background:linear-gradient(135deg,#749b58,#0f1410); }
+  .theme-swatch.t-parchment{ background:linear-gradient(135deg,#a03f2e,#ece2c9); }
+  .theme-swatch.t-midnight{ background:linear-gradient(135deg,#5b8fe0,#0a0e1a); }
+  .theme-swatch.t-amber{ background:linear-gradient(135deg,#e08a3c,#160f08); }
+
+  .motion-row{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:14px; padding-top:12px; border-top:1px solid var(--line);
+  }
+  .motion-label{ font-size:11px; color:var(--silver-dim); }
+  .motion-switch{
+    position:relative; width:32px; height:18px; border-radius:20px; cursor:pointer;
+    background:var(--panel-2); border:1px solid var(--line); flex-shrink:0;
+  }
+  .motion-switch .knob{
+    position:absolute; top:1px; left:1px; width:14px; height:14px; border-radius:50%;
+    background:var(--silver-dim); transition:transform .18s ease, background .18s ease;
+  }
+  .motion-switch.on{ border-color:var(--accent-dim); }
+  .motion-switch.on .knob{ transform:translateX(14px); background:var(--accent); }
+  .bg-anim-select{
+    background:var(--panel-2); border:1px solid var(--line); color:var(--silver);
+    font-family:'Plus Jakarta Sans',sans-serif; font-size:11px; border-radius:3px;
+    padding:4px 6px; cursor:pointer;
+  }
+  .account-email{ font-size:11px; color:var(--silver-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:170px; }
+  .account-link{ background:none; border:none; color:var(--gold); font-size:11px; cursor:pointer; text-decoration:underline; font-family:'Plus Jakarta Sans',sans-serif; padding:0; flex-shrink:0; }
+
+
+  .tree-wrap{ flex:1; overflow-y:auto; padding:14px 10px 10px; min-height:0; -webkit-overflow-scrolling:touch; touch-action:pan-y; overflow-anchor:none; }
+  .tree-wrap::-webkit-scrollbar{ width:6px; }
+  .tree-wrap::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
+
+  .new-series-btn{
+    width:100%; margin:0 0 12px 0; display:flex; align-items:center; gap:8px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-dim));
+    border:none; color:var(--silver); border-radius:3px;
+    padding:10px 12px; font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; font-weight:600;
+    cursor:pointer; text-align:left; box-shadow:0 2px 8px rgba(0,0,0,.2);
+  }
+  .new-series-btn:hover{ filter:brightness(1.1); box-shadow:0 4px 14px rgba(0,0,0,.3); }
+  .new-series-btn .plus{ font-size:15px; line-height:1; }
+
+  .series-block{ margin-bottom:8px; border-radius:3px; animation:item-in .25s ease; }
+  .series-head{
+    display:flex; align-items:center; gap:8px;
+    padding:8px 8px; border-radius:3px; cursor:pointer; user-select:none;
+    background:var(--panel);
+  }
+  .series-head:hover{ filter:brightness(1.15); }
+  .series-chevron{
+    width:9px; height:9px; flex-shrink:0;
+    border-right:1.5px solid var(--gold); border-bottom:1.5px solid var(--gold);
+    transform:rotate(-45deg); transition:transform .15s; margin-left:2px;
+  }
+  .series-block.open .series-chevron{ transform:rotate(45deg); }
+  .series-title{
+    flex:1; font-weight:700; color:var(--gold);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    font-family:'Bricolage Grotesque', serif; letter-spacing:0.01em; font-size:15.5px;
+  }
+  .series-count{ font-size:10px; color:var(--silver-dim); }
+  .series-del{
+    opacity:.5; width:22px; height:22px; border:none; background:none;
+    color:var(--silver-dim); cursor:pointer; font-size:14px; line-height:1; border-radius:4px;
+    flex-shrink:0; transition:opacity .15s ease, color .15s ease, background .15s ease;
+  }
+  .series-head:hover .series-del{ opacity:1; }
+  .series-del:hover{ color:var(--danger); background:rgba(0,0,0,.15); }
+
+  .series-body{ display:none; padding:8px 0 4px 10px; }
+  .series-block.open .series-body{ display:block; }
+
+  .new-season-btn{
+    width:100%; margin:6px 0 6px 0;
+    background:none; border:1px dashed var(--line);
+    color:var(--silver-dim); border-radius:3px;
+    padding:7px 9px; font-family:'Plus Jakarta Sans',sans-serif; font-size:12px;
+    cursor:pointer; text-align:left; transition:border-color .15s, color .15s;
+  }
+  .new-season-btn:hover{ border-color:var(--accent); color:var(--silver); }
+
+  .season{ margin-bottom:2px; animation:item-in .25s ease; }
+  @keyframes item-in{
+    from{ opacity:0; transform:translateX(-4px); }
+    to{ opacity:1; transform:translateX(0); }
+  }
+  .season-head{
+    display:flex; align-items:center; gap:8px;
+    padding:7px 8px; border-radius:3px; cursor:pointer; user-select:none;
+  }
+  .season-head:hover{ background:var(--panel); }
+  .season-chevron{
+    width:8px; height:8px; flex-shrink:0;
+    border-right:1.5px solid var(--silver-dim); border-bottom:1.5px solid var(--silver-dim);
+    transform:rotate(-45deg); transition:transform .15s; margin-left:2px;
+  }
+  .season.open .season-chevron{ transform:rotate(45deg); }
+  .season-title{
+    flex:1; font-size:13px; font-weight:600; color:var(--silver);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .season-count{ font-size:10.5px; color:var(--silver-dim); }
+  .season-del{
+    opacity:.5; width:22px; height:22px; border:none; background:none;
+    color:var(--silver-dim); cursor:pointer; font-size:13px; line-height:1; border-radius:4px;
+    flex-shrink:0; transition:opacity .15s ease, color .15s ease, background .15s ease;
+  }
+  .season-head:hover .season-del{ opacity:1; }
+  .season-del:hover{ color:var(--danger); background:rgba(0,0,0,.15); }
+
+  .episodes{ display:none; padding-left:17px; margin-top:2px; }
+  .season.open .episodes{ display:block; }
+
+  .episode{
+    display:flex; align-items:center; gap:7px;
+    padding:6px 8px; border-radius:3px; cursor:pointer;
+    font-size:12.5px; color:var(--silver-dim);
+    border-left:1px solid var(--line); margin-left:2px;
+    animation:item-in .25s ease;
+  }
+  .episode:hover{ background:var(--panel); color:var(--silver); transform:translateX(2px); }
+  .episode.active{ background:var(--panel-2); color:var(--gold); border-left-color:var(--accent); }
+  .ep-status-dot{
+    width:8px; height:8px; border-radius:50%; flex-shrink:0; cursor:pointer;
+    border:1.5px solid var(--silver-dim); background:none;
+  }
+  .ep-status-dot.done{ background:var(--ok); border-color:var(--ok); }
+  .episode-name{ flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .episode-del{
+    opacity:.5; width:20px; height:20px; border:none; background:none;
+    color:var(--silver-dim); cursor:pointer; font-size:12px; line-height:1; border-radius:4px;
+    flex-shrink:0; transition:opacity .15s ease, color .15s ease, background .15s ease;
+  }
+  .episode:hover .episode-del{ opacity:1; }
+  .episode-del:hover{ color:var(--danger); background:rgba(0,0,0,.15); }
+
+  .new-episode-btn{
+    margin:2px 0 6px 19px;
+    background:none; border:none; color:var(--accent);
+    font-size:11.5px; cursor:pointer; padding:5px 8px;
+    opacity:.85;
+  }
+  .new-episode-btn:hover{ opacity:1; text-decoration:underline; }
+
+  .sidebar-footer-wrap{ border-top:1px solid var(--line); }
+  .sidebar-footer-wrap .motion-row{
+    margin-top:0; padding:9px 18px; border-top:none; border-bottom:1px solid var(--line);
+  }
+  .sidebar-footer{
+    padding:11px 18px;
+    font-size:10.5px; color:var(--silver-dim); display:flex; justify-content:space-between; align-items:center;
+  }
+  .save-dot{ width:6px; height:6px; border-radius:50%; background:var(--ok); display:inline-block; margin-right:5px; transition:background .2s; }
+  .save-dot.saving{ background:var(--gold); animation:save-pulse .9s ease-in-out infinite; }
+  @keyframes save-pulse{
+    0%,100%{ transform:scale(1); opacity:1; }
+    50%{ transform:scale(1.6); opacity:.55; }
+  }
+
+  .main{ flex:1; display:flex; flex-direction:column; height:100vh; height:100dvh; min-width:0; min-height:0; }
+  #mainContent{ display:flex; flex-direction:column; flex:1; min-height:0; }
+
+  .topbar{
+    padding:16px 32px; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:14px;
+  }
+  .crumb{ font-size:11px; color:var(--silver-dim); white-space:nowrap; }
+  .ep-title-input{
+    background:none; border:none; outline:none;
+    font-family:'Bricolage Grotesque', serif; font-weight:600;
+    font-size:26px; color:var(--silver); flex:1; min-width:0;
+  }
+  .ep-title-input::placeholder{ color:var(--silver-dim); }
+  .ep-meta{ font-size:12px; color:var(--silver-dim); white-space:nowrap; }
+
+  .status-toggle{
+    display:flex; border:1px solid var(--line); border-radius:3px; overflow:hidden; flex-shrink:0;
+  }
+  .status-opt{
+    padding:5px 12px; font-size:11px; cursor:pointer; background:none; border:none;
+    color:var(--silver-dim); font-family:'Plus Jakarta Sans',sans-serif;
+  }
+  .status-opt.active.devam{ background:var(--accent-dim); color:var(--silver); }
+  .status-opt.active.bitti{ background:var(--ok); color:var(--void); }
+
+  .save-pill{
+    font-size:11px; color:var(--ok); border:1px solid var(--accent-dim);
+    padding:4px 10px; border-radius:3px; white-space:nowrap;
+    transition:color .2s, border-color .2s;
+  }
+  .save-pill.saving{ color:var(--gold); }
+
+  .tabs{
+    display:flex; gap:2px; padding:0 32px; border-bottom:1px solid var(--line);
+    background:var(--ink);
+  }
+  .tab{
+    padding:10px 16px; font-size:12.5px; color:var(--silver-dim);
+    cursor:pointer; border-bottom:2px solid transparent; user-select:none;
+  }
+  .tab:hover{ color:var(--silver); }
+  .tab{ position:relative; }
+  .tab.active{ color:var(--gold); border-bottom-color:var(--gold); }
+  .tab.active::after{
+    content:''; position:absolute; left:12px; right:12px; bottom:-2px; height:2px;
+    background:var(--gold); animation:tab-underline .25s ease;
+  }
+  @keyframes tab-underline{ from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
+
+  .panes{ flex:1; overflow:hidden; position:relative; min-height:0; }
+  .pane{ display:none; height:100%; }
+  .pane.active{ display:flex; flex-direction:column; animation:pane-in .3s ease; min-height:0; }
+  @keyframes pane-in{
+    from{ opacity:0; transform:translateY(8px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  .editor-scroll{ flex:1; overflow-y:auto; padding:28px 0; min-height:0; -webkit-overflow-scrolling:touch; touch-action:pan-y; overflow-anchor:none; }
+  .editor-scroll::-webkit-scrollbar{ width:8px; }
+  .editor-scroll::-webkit-scrollbar-thumb{ background:var(--line); border-radius:4px; }
+  .editor-inner{ max-width:720px; margin:0 auto; padding:0 32px; }
+
+  .format-bar{
+    display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; align-items:center;
+  }
+  .fmt-btn{
+    background:var(--panel); border:1px solid var(--line); color:var(--silver-dim);
+    font-size:11.5px; padding:6px 11px; border-radius:3px; cursor:pointer;
+    font-family:'Plus Jakarta Sans',sans-serif;
+  }
+  .fmt-btn:hover{ color:var(--silver); border-color:var(--accent-dim); }
+  .font-select{
+    background:var(--panel); border:1px solid var(--line); color:var(--silver);
+    font-size:11.5px; padding:6px 9px; border-radius:3px; cursor:pointer;
+    font-family:'Plus Jakarta Sans',sans-serif;
+  }
+  .spell-toggle{
+    margin-left:auto; display:flex; align-items:center; gap:6px;
+    font-size:11.5px; color:var(--silver-dim); cursor:pointer; user-select:none;
+  }
+  .spell-toggle input{ accent-color:var(--accent); }
+
+  .color-bar{
+    display:flex; align-items:center; gap:7px; margin-bottom:16px; flex-wrap:wrap;
+    padding-bottom:14px; border-bottom:1px solid var(--line);
+  }
+  .color-bar-label{ font-size:11.5px; color:var(--silver-dim); margin-right:2px; }
+  .color-swatch{
+    width:20px; height:20px; border-radius:50%; border:1.5px solid var(--line);
+    cursor:pointer; padding:0; transition:transform .12s ease, border-color .12s ease;
+  }
+  .color-swatch:hover{ transform:scale(1.2); border-color:var(--silver); }
+  .color-custom{
+    width:24px; height:24px; padding:0; border:1.5px solid var(--line); border-radius:50%;
+    background:none; cursor:pointer; overflow:hidden;
+  }
+  .color-custom::-webkit-color-swatch-wrapper{ padding:0; border-radius:50%; }
+  .color-custom::-webkit-color-swatch{ border:none; border-radius:50%; }
+
+  #editor{
+    width:100%; min-height:60vh; background:none; border:none; outline:none;
+    color:var(--silver); font-size:16.5px; line-height:1.85;
+    font-family:var(--editor-font); white-space:pre-wrap; word-wrap:break-word;
+  }
+  #editor:empty::before{ content:attr(placeholder); color:var(--silver-dim); pointer-events:none; }
+
+  .editor-footer{
+    border-top:1px solid var(--line); padding:14px 32px;
+    display:flex; justify-content:space-between; font-size:11.5px; color:var(--silver-dim);
+  }
+
+  .notes-pane{ padding:28px 32px; overflow-y:auto; flex:1; min-height:0; -webkit-overflow-scrolling:touch; touch-action:pan-y; overflow-anchor:none; }
+  .notes-grid{ max-width:820px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .note-card{ background:var(--panel); border:1px solid var(--line); border-radius:3px; padding:18px; }
+  .note-card h3{
+    margin:0 0 10px; font-family:'Bricolage Grotesque', serif; font-weight:600;
+    font-size:17px; color:var(--gold); font-style:italic;
+  }
+  .note-card textarea{
+    width:100%; min-height:130px; background:none; border:none; outline:none;
+    resize:vertical; color:var(--silver-dim); font-size:13.5px; line-height:1.7;
+    font-family:var(--editor-font);
+  }
+  .note-card textarea:focus{ color:var(--silver); }
+
+  .chars-pane, .images-pane{ padding:28px 32px; overflow-y:auto; flex:1; min-height:0; -webkit-overflow-scrolling:touch; touch-action:pan-y; overflow-anchor:none; }
+  .chars-inner, .images-inner{ max-width:820px; margin:0 auto; }
+  .char-add, .img-add-label{
+    display:inline-block;
+    background:none; border:1px dashed var(--line); color:var(--silver-dim);
+    padding:10px 16px; border-radius:3px; cursor:pointer; font-size:13px; margin-bottom:16px;
+  }
+  .char-add:hover, .img-add-label:hover{ border-color:var(--accent); color:var(--silver); }
+  .char-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:3px;
+    padding:16px 18px; margin-bottom:12px; display:flex; gap:14px; align-items:flex-start;
+  }
+  .char-avatar{
+    width:38px; height:38px; border-radius:50%; flex-shrink:0; margin-top:2px;
+    background:linear-gradient(135deg, var(--accent), var(--gold));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Bricolage Grotesque', serif; font-weight:600; font-size:16px; color:var(--void);
+    overflow:hidden; background-size:cover; background-position:center;
+  }
+  .char-body{ flex:1; min-width:0; }
+  .char-name{
+    background:none; border:none; outline:none; width:100%;
+    font-size:15px; font-weight:700; color:var(--silver); margin-bottom:6px;
+    font-family:'Plus Jakarta Sans',sans-serif;
+  }
+  .char-name::placeholder{ font-weight:600; color:var(--silver-dim); }
+  .char-desc{
+    background:none; border:none; outline:none; width:100%; resize:none;
+    color:var(--silver-dim); font-size:13px; line-height:1.6; min-height:20px;
+    font-family:'Plus Jakarta Sans',sans-serif;
+  }
+  .char-desc:focus{ color:var(--silver); }
+  .char-photo-btn{
+    font-size:10.5px; color:var(--accent); cursor:pointer; margin-top:6px; display:inline-block;
+  }
+  .char-del{
+    background:none; border:none; color:var(--silver-dim); cursor:pointer;
+    font-size:16px; margin-top:2px;
+  }
+  .char-del:hover{ color:var(--danger); }
+
+  .img-hint{ font-size:11.5px; color:var(--silver-dim); margin-bottom:14px; }
+  .img-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:16px; }
+  .img-card{ background:var(--panel); border:1px solid var(--line); border-radius:3px; overflow:hidden; }
+  .img-card img{ width:100%; height:140px; object-fit:cover; display:block; }
+  .img-card-body{ padding:10px 12px; }
+  .img-caption{
+    width:100%; background:none; border:none; outline:none; color:var(--silver-dim);
+    font-size:12px; font-family:'Plus Jakarta Sans',sans-serif;
+  }
+  .img-caption:focus{ color:var(--silver); }
+  .img-del{
+    background:none; border:none; color:var(--silver-dim); cursor:pointer; font-size:12px;
+    float:right;
+  }
+  .img-del:hover{ color:var(--danger); }
+
+  .empty-state{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:var(--silver-dim); text-align:center; padding:40px;
+  }
+  .empty-state .moon-icon{ margin-bottom:18px; opacity:.5; }
+  .empty-state h2{
+    font-family:'Bricolage Grotesque', serif; font-weight:500; font-style:italic;
+    color:var(--silver); font-size:22px; margin:0 0 8px;
+  }
+  .empty-state p{ font-size:13.5px; max-width:340px; line-height:1.6; margin:0; }
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--panel-2); border:1px solid var(--accent-dim); color:var(--silver);
+    padding:10px 18px; border-radius:3px; font-size:12.5px; opacity:0;
+    transition:opacity .25s, transform .25s; pointer-events:none; z-index:50;
+    box-shadow:0 8px 24px rgba(0,0,0,.35);
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ============ AMBIENT BACKGROUND (seçilebilir) ============ */
+  .bg-ambience{
+    position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+    contain:strict; will-change:auto;
+  }
+  .bg-orb{ display:none; }
+  .bg-stars{ position:absolute; inset:0; opacity:0; }
+  .bg-star{ position:absolute; width:2px; height:2px; border-radius:50%; opacity:0; }
+  .bg-sweep{ display:none; }
+
+  /* --- Kapalı --- */
+  body[data-bg-anim="off"] .bg-ambience{ display:none; }
+
+  /* --- Mürekkep benekleri (parlak) --- */
+  body[data-bg-anim="dots"] .bg-stars{ opacity:.85; mix-blend-mode:normal; }
+  body[data-bg-anim="dots"] .bg-star{
+    width:2.5px; height:2.5px; background:var(--gold);
+    animation:fleck 5s ease-in-out infinite;
+  }
+  @keyframes fleck{
+    0%,100%{ opacity:0; transform:scale(.7); }
+    50%{ opacity:1; transform:scale(1.5); }
+  }
+
+  /* --- Yumuşak parıltı (belirgin) --- */
+  body[data-bg-anim="glow"] .bg-orb{
+    display:block; position:absolute; border-radius:50%; filter:blur(80px);
+    animation:orb-float 26s ease-in-out infinite;
+  }
+  body[data-bg-anim="glow"] .bg-orb.o1{ width:520px; height:520px; background:var(--accent); opacity:.4; top:-160px; right:-120px; animation-duration:30s; }
+  body[data-bg-anim="glow"] .bg-orb.o2{ width:380px; height:380px; background:var(--gold); opacity:.3; bottom:-130px; left:-90px; animation-duration:36s; animation-direction:reverse; }
+  body[data-bg-anim="glow"] .bg-orb.o3{ width:300px; height:300px; background:var(--gold); opacity:.22; bottom:22%; right:14%; animation-duration:22s; }
+  @keyframes orb-float{
+    0%{ transform:translate(0,0) scale(1); }
+    50%{ transform:translate(34px,-40px) scale(1.1); }
+    100%{ transform:translate(0,0) scale(1); }
+  }
+
+  /* --- Yükselen parçacıklar --- */
+  body[data-bg-anim="rise"] .bg-stars{ opacity:.9; }
+  body[data-bg-anim="rise"] .bg-star{
+    width:3px; height:3px; background:var(--gold);
+    top:auto !important; bottom:-10px;
+    animation:rise 8s linear infinite;
+  }
+  @keyframes rise{
+    0%{ transform:translateY(0) translateX(0); opacity:0; }
+    12%{ opacity:.9; }
+    88%{ opacity:.5; }
+    100%{ transform:translateY(-105vh) translateX(16px); opacity:0; }
+  }
+
+  /* --- Kayan ışık --- */
+  body[data-bg-anim="sweep"] .bg-sweep{
+    display:block; position:absolute; inset:-50%; width:200%; height:200%;
+    background:linear-gradient(115deg, transparent 40%, color-mix(in srgb, var(--gold) 22%, transparent) 50%, transparent 60%);
+    animation:sweep 7s ease-in-out infinite;
+  }
+  @keyframes sweep{
+    0%,100%{ transform:translateX(-30%) translateY(-10%); }
+    50%{ transform:translateX(10%) translateY(10%); }
+  }
+
+  body[data-theme="parchment"] .bg-star{ background:var(--accent); }
+
+  .app{ position:relative; z-index:1; }
+
+  /* ============ VERSION BADGE ============ */
+  .version-badge{
+    position:fixed; bottom:14px; right:16px; z-index:40;
+    font-size:10.5px; letter-spacing:.04em; color:var(--silver-dim);
+    background:var(--panel); border:1px solid var(--line); border-radius:3px;
+    padding:5px 12px; display:flex; align-items:center; gap:6px;
+    box-shadow:0 6px 18px rgba(0,0,0,.25);
+  }
+  .version-badge .dot{ width:6px; height:6px; border-radius:50%; background:var(--ok); }
+
+  /* ============ SPLASH / INTRO ============ */
+  .splash{
+    position:fixed; inset:0; z-index:100;
+    background:var(--void);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    transition:opacity .6s ease, visibility .6s ease;
+  }
+  .splash.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+  .splash-moon{
+    width:64px; height:64px; margin-bottom:22px;
+    animation:splash-pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes splash-pulse{
+    0%,100%{ filter:drop-shadow(0 0 5px rgba(200,161,92,.3)); transform:scale(1); }
+    50%{ filter:drop-shadow(0 0 16px rgba(200,161,92,.6)); transform:scale(1.04); }
+  }
+  .splash-title{
+    font-family:'Bricolage Grotesque', serif; font-weight:600; font-style:italic;
+    font-size:34px; color:var(--silver); letter-spacing:.02em;
+    opacity:0; animation:splash-fade-up .9s ease .3s forwards;
+  }
+  .splash-sub{
+    font-size:11px; letter-spacing:.24em; color:var(--silver-dim); margin-top:10px;
+    opacity:0; animation:splash-fade-up .9s ease .55s forwards;
+  }
+  @keyframes splash-fade-up{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .splash-bar{
+    width:180px; height:2px; background:var(--line); border-radius:2px; margin-top:28px; overflow:hidden;
+    opacity:0; animation:splash-fade-up .9s ease .7s forwards;
+  }
+  .splash-bar-fill{
+    height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--gold));
+    animation:splash-load 1.3s ease .8s forwards;
+  }
+  @keyframes splash-load{ to{ width:100%; } }
+
+  /* ============ AUTH SCREEN ============ */
+  .auth-screen{
+    position:fixed; inset:0; z-index:105; display:none;
+    align-items:center; justify-content:center;
+    background:var(--void);
+  }
+  .auth-screen.show{ display:flex; }
+  .auth-card{
+    width:320px; max-width:88vw; display:flex; flex-direction:column; align-items:center;
+    text-align:center; gap:9px;
+  }
+  .auth-moon{ width:34px; height:34px; margin-bottom:4px; }
+  .auth-title{ font-family:'Bricolage Grotesque',serif; font-weight:600; font-style:italic; font-size:24px; color:var(--silver); }
+  .auth-sub{ font-size:12px; color:var(--silver-dim); margin-bottom:10px; line-height:1.4; }
+  .auth-input{
+    width:100%; background:var(--panel); border:1px solid var(--line); color:var(--silver);
+    border-radius:3px; padding:10px 12px; font-family:'Plus Jakarta Sans',sans-serif; font-size:13px;
+  }
+  .auth-input:focus{ outline:none; border-color:var(--accent-dim); }
+  .auth-error{ color:var(--danger); font-size:11.5px; min-height:14px; }
+  .auth-btn{
+    width:100%; padding:10px 12px; border-radius:3px; font-family:'Plus Jakarta Sans',sans-serif;
+    font-size:13px; font-weight:600; cursor:pointer; border:none;
+  }
+  .auth-btn-primary{ background:linear-gradient(135deg, var(--accent), var(--accent-dim)); color:var(--silver); }
+  .auth-btn-primary:hover{ filter:brightness(1.1); }
+  .auth-btn-secondary{ background:var(--panel-2); border:1px solid var(--line); color:var(--silver); }
+  .auth-btn-secondary:hover{ border-color:var(--gold); }
+  .auth-divider{ font-size:10.5px; color:var(--silver-dim); margin:2px 0; }
+  .auth-btn-ghost{ background:transparent; color:var(--silver-dim); text-decoration:underline; }
+  .auth-btn-ghost:hover{ color:var(--silver); }
+
+  /* ============ REFINED BUTTONS ============ */
+  .new-series-btn, .new-season-btn, .new-episode-btn, .fmt-btn, .char-add, .img-add-label,
+  .exportBtn, #exportBtn{
+    transition:transform .12s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .new-series-btn:active, .fmt-btn:active, .char-add:active, .img-add-label:active{
+    transform:scale(.97);
+  }
+  .new-series-btn{
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+  }
+  .new-series-btn:hover{
+    background:var(--panel-2);
+    box-shadow:0 4px 14px rgba(0,0,0,.25);
+  }
+  #exportBtn{
+    background:linear-gradient(135deg, var(--accent), var(--accent-dim));
+    color:var(--silver); border:none; font-weight:600;
+    box-shadow:0 3px 10px rgba(0,0,0,.25);
+  }
+  #exportBtn:hover{ filter:brightness(1.12); box-shadow:0 5px 16px rgba(0,0,0,.35); }
+  #exportBtn:active{ transform:scale(.96); }
+  .status-toggle{ box-shadow:0 2px 8px rgba(0,0,0,.15); }
+  .status-opt{ transition:background .15s ease, color .15s ease; cursor:pointer; }
+  .save-pill{ box-shadow:0 2px 8px rgba(0,0,0,.12); }
+  .theme-swatch{ transition:transform .15s ease, border-color .15s ease; box-shadow:0 2px 6px rgba(0,0,0,.3); }
+  .theme-swatch:hover{ transform:scale(1.15); }
+  .episode{ transition:background .15s ease, color .15s ease, border-color .15s ease, transform .15s ease; }
+  .fmt-btn:hover, .char-add:hover, .img-add-label:hover{ transform:translateY(-1px); }
+  .episode.active{ box-shadow:inset 0 0 0 1px var(--accent-dim); }
+  .series-head, .season-head{ transition:background .15s ease; }
+  .tab{ transition:color .15s ease, border-color .15s ease; }
+  .char-card, .img-card, .note-card{ transition:border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+  .char-card:hover, .img-card:hover, .note-card:hover{
+    border-color:var(--accent-dim); box-shadow:0 4px 16px rgba(0,0,0,.2); transform:translateY(-2px);
+  }
+  .ep-status-dot{ transition:transform .15s ease, background .15s ease; }
+  .ep-status-dot:hover{ transform:scale(1.25); }
+
+  /* ============ PHONE MODE / RESPONSIVE ============ */
+  .menu-toggle{
+    display:none; position:relative; z-index:20; flex-direction:column; justify-content:center;
+    align-items:center; gap:4px; width:40px; height:40px; margin:12px 0 0 16px; flex-shrink:0;
+    background:var(--panel); border:1px solid var(--line); border-radius:3px; cursor:pointer;
+    touch-action:manipulation;
+  }
+  .menu-toggle span{ width:16px; height:1.5px; background:var(--silver); display:block; }
+  .sidebar-backdrop{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:59;
+  }
+  .sidebar-backdrop.show{ display:block; }
+
+  @media (max-width: 820px){
+    .menu-toggle{ display:flex; }
+    .app{ position:relative; }
+    .sidebar{
+      position:fixed; top:0; left:0; z-index:60; width:82vw; max-width:320px; min-width:0;
+      transform:translateX(-100%); transition:transform .25s ease;
+      box-shadow:12px 0 32px rgba(0,0,0,.4);
+    }
+    .sidebar.open{ transform:translateX(0); }
+    .main{ width:100%; }
+    .version-badge{ display:none; }
+    .topbar{ padding:10px 14px; gap:10px; flex-wrap:wrap; }
+    .ep-title-input{ font-size:20px; }
+    .ep-meta{ display:none; }
+    .status-toggle{ order:3; }
+    .tabs{ padding:0 14px; overflow-x:auto; }
+    .tabs::-webkit-scrollbar{ display:none; }
+    .editor-inner{ padding:0 16px; max-width:100%; }
+    .notes-pane, .chars-pane, .images-pane{ padding:20px 16px; }
+    .notes-grid{ grid-template-columns:1fr; }
+    .img-grid{ grid-template-columns:repeat(auto-fill, minmax(130px,1fr)); }
+    .editor-footer{ padding:12px 16px; }
+    .char-card{ flex-wrap:wrap; }
+  }
+
+  /* ============ LUNA v1.6 — YENİ TASARIM (eski animasyonlar korunur) ============ */
+  :root{
+    --void:#0a1216; --ink:#0e181d; --panel:#14232a; --panel-2:#1a2d36; --line:#25414c;
+    --silver:#e8f1f0; --silver-dim:#86a3a6; --accent:#ff8f6b; --accent-dim:#5a3a30; --gold:#f4cf8a;
+    --editor-size:17px;
+  }
+  body{ background:radial-gradient(900px 500px at 90% -10%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 60%), var(--void); }
+  .app{ padding:14px; gap:14px; }
+  .sidebar, .main{ height:calc(100dvh - 28px); background:var(--ink); border:1px solid var(--line); border-radius:22px; overflow:hidden; }
+  .sidebar::before{ display:none; }
+  .empty-state{ height:100% !important; }
+  .brand{ border-bottom:none; padding:20px 20px 10px; }
+  .brand-icon{ border-radius:13px; width:40px; height:40px; }
+  .brand-text .b1, .splash-title, .auth-title, .empty-state h2, .note-card h3{ font-style:normal; font-weight:700; letter-spacing:-.02em; }
+  .brand-text .b1{ font-size:22px; }
+  .series-title{ color:var(--silver); font-weight:700; letter-spacing:-.01em; }
+  .series-head, .season-head, .episode, .new-series-btn, .new-season-btn, .new-episode-btn, .fmt-btn, .font-select,
+  .bg-anim-select, .char-add, .img-add-label, .auth-input, .auth-btn, .toast, .version-badge, .menu-toggle{ border-radius:12px; }
+  .status-toggle, .save-pill{ border-radius:999px; }
+  .status-opt{ padding:6px 14px; }
+  .series-head{ background:var(--panel); }
+  .episode{ border-left:none; margin-left:0; }
+  .episode.active{ background:var(--accent); color:var(--void); font-weight:600; box-shadow:none; }
+  .episode.active .episode-del, .episode.active .episode-half{ color:var(--void); }
+  .episode.half{ margin-left:16px; font-size:12px; border-left:1.5px dashed var(--line); border-radius:0 12px 12px 0; }
+  .episode-half{ opacity:.5; min-width:22px; height:20px; border:none; background:none; color:var(--silver-dim); cursor:pointer; font-size:13px; border-radius:6px; flex-shrink:0; transition:opacity .15s, color .15s; }
+  .episode:hover .episode-half{ opacity:1; }
+  .episode-half:hover{ color:var(--accent); background:rgba(0,0,0,.15); }
+  .new-episode-btn.half{ margin-top:-4px; color:var(--gold); }
+  .new-series-btn, #exportBtn, .auth-btn-primary{ background:var(--accent); color:var(--void); box-shadow:none; }
+  .new-series-btn:hover, #exportBtn:hover, .auth-btn-primary:hover{ background:var(--accent); filter:brightness(1.1); }
+  .topbar{ padding:22px 34px 12px; border-bottom:none; }
+  .ep-title-input{ font-size:30px; font-weight:700; letter-spacing:-.025em; }
+  .crumb{ font-size:12px; font-weight:500; }
+  .tabs{ background:none; border-bottom:1px solid var(--line); padding:0 34px 12px; gap:6px; }
+  .tab{ border-radius:999px; border-bottom:0; padding:7px 16px; }
+  .tab.active{ background:var(--panel-2); color:var(--accent); border-bottom-color:transparent; animation:tab-pop .25s ease; }
+  .tab.active::after{ display:none; }
+  @keyframes tab-pop{ from{ transform:scale(.92); } to{ transform:scale(1); } }
+  .note-card, .char-card, .img-card{ border-radius:20px; }
+  .note-card h3{ color:var(--accent); font-size:15px; }
+  .editor-inner{ max-width:760px; }
+  #editor{ font-size:var(--editor-size,17px); line-height:1.9; }
+  .auth-card{ width:360px; padding:34px 28px; background:var(--ink); border:1px solid var(--line); border-radius:26px; }
+  .splash-title{ font-weight:700; }
+  button:focus-visible, select:focus-visible, .tab:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  /* Odak modu */
+  body.zen .sidebar, body.zen .tabs, body.zen .format-bar, body.zen .color-bar, body.zen .menu-toggle,
+  body.zen .editor-footer span:last-child, body.zen .version-badge{ display:none !important; }
+  body.zen .app{ padding:0; }
+  body.zen .main{ height:100dvh; border:none; border-radius:0; }
+
+  @media (max-width: 820px){
+    .app{ padding:0; }
+    .sidebar{ height:100dvh; border-radius:0 22px 22px 0; }
+    .main{ height:100dvh; border:none; border-radius:0; }
+    .topbar{ padding:10px 14px; }
+    .ep-title-input{ font-size:22px; }
+    .tabs{ padding:0 14px 10px; }
+  }
+  @media (prefers-reduced-motion: reduce){ *, *::before, *::after{ animation-duration:.01ms !important; transition-duration:.01ms !important; } }
+
+  /* ============ LUNA v1.7 — CAM (iOS "liquid glass") + 90s + ARKA PLAN GERİ ============ */
+  :root{
+    --g-bg:color-mix(in srgb,var(--silver) 9%,transparent);
+    --g-bd:color-mix(in srgb,var(--silver) 22%,transparent);
+    --g-hl:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(255,255,255,.05),inset 0 0 16px rgba(255,255,255,.04);
+    --g-sh:0 8px 22px rgba(0,0,0,.28);
+  }
+  /* Paneller artık yarı saydam: arka plan animasyonu görünür (önceki sürümde opak panel onu örtüyordu) */
+  .sidebar{ background:color-mix(in srgb,var(--ink) 62%,transparent); border-color:var(--g-bd); box-shadow:var(--g-hl),0 20px 60px rgba(0,0,0,.35); }
+  .main{ background:color-mix(in srgb,var(--ink) 42%,transparent); border-color:var(--g-bd); box-shadow:var(--g-hl),0 20px 60px rgba(0,0,0,.35); }
+  .topbar,.tabs{ background:none; }
+
+  .new-series-btn,.new-season-btn,.fmt-btn,.font-select,.bg-anim-select,.char-add,.img-add-label,.auth-input,.auth-btn,.status-toggle,.save-pill,.menu-toggle,.version-badge,.toast,.series-head,.note-card,.char-card,.img-card,.motion-switch,#exportBtn,.tab.active{
+    background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.03)),var(--g-bg);
+    border:1px solid var(--g-bd); color:var(--silver);
+    -webkit-backdrop-filter:blur(16px) saturate(180%); backdrop-filter:blur(16px) saturate(180%);
+    box-shadow:var(--g-hl),var(--g-sh);
+  }
+  .new-series-btn,.new-season-btn,.fmt-btn,.char-add,.img-add-label,.auth-btn,#exportBtn,.series-head{ transition:transform .15s ease, background .15s ease, box-shadow .15s ease; }
+  .new-series-btn:hover,.new-season-btn:hover,.fmt-btn:hover,.char-add:hover,.img-add-label:hover,.auth-btn:hover,#exportBtn:hover,.series-head:hover{
+    background:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,.07)),var(--g-bg);
+    filter:none; transform:translateY(-1px);
+    box-shadow:var(--g-hl),0 12px 28px rgba(0,0,0,.34);
+  }
+  .tab{ background:none; border:1px solid transparent; box-shadow:none; }
+  .tab.active{ color:var(--accent); }
+  .new-series-btn,#exportBtn,.auth-btn-primary,.episode.active{
+    background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,.05)),color-mix(in srgb,var(--accent) 52%,transparent);
+    border:1px solid color-mix(in srgb,var(--accent) 60%,rgba(255,255,255,.35)); color:var(--silver); font-weight:600;
+    -webkit-backdrop-filter:blur(16px) saturate(180%); backdrop-filter:blur(16px) saturate(180%);
+    box-shadow:var(--g-hl),0 8px 22px color-mix(in srgb,var(--accent) 28%,transparent);
+  }
+  .new-series-btn:hover,#exportBtn:hover,.auth-btn-primary:hover,.episode.active:hover{ background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,.08)),color-mix(in srgb,var(--accent) 62%,transparent); }
+  .episode.active .episode-del,.episode.active .episode-half{ color:var(--silver); }
+  .auth-card{ background:color-mix(in srgb,var(--ink) 55%,transparent); -webkit-backdrop-filter:blur(24px) saturate(180%); backdrop-filter:blur(24px) saturate(180%); box-shadow:var(--g-hl),0 24px 70px rgba(0,0,0,.45); }
+  .auth-btn-ghost{ background:none !important; border:none !important; box-shadow:none !important; -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+  .series-head,.note-card,.char-card,.img-card{ border-radius:18px; }
+  .char-card:hover,.img-card:hover,.note-card:hover{ background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.05)),var(--g-bg); }
+
+  /* Yeni arka plan animasyonları */
+  body[data-bg-anim="rain"] .bg-stars{ opacity:.85; }
+  body[data-bg-anim="rain"] .bg-star{ width:1.5px; height:18px; border-radius:2px; background:linear-gradient(transparent,var(--silver-dim)); top:-24px !important; animation:rain-fall 1.7s linear infinite; animation-duration:1.7s !important; }
+  @keyframes rain-fall{ 0%{ transform:translateY(0); opacity:0; } 10%{ opacity:.75; } 100%{ transform:translateY(112vh); opacity:0; } }
+  body[data-bg-anim="aurora"] .bg-orb{ display:block; position:absolute; border-radius:50%; filter:blur(90px); animation:orb-float 26s ease-in-out infinite; }
+  body[data-bg-anim="aurora"] .bg-orb.o1{ width:620px; height:360px; background:#4ee0b4; opacity:.3; top:-80px; left:8%; }
+  body[data-bg-anim="aurora"] .bg-orb.o2{ width:540px; height:320px; background:#7a6cff; opacity:.32; top:12%; right:-80px; animation-duration:34s; animation-direction:reverse; }
+  body[data-bg-anim="aurora"] .bg-orb.o3{ width:480px; height:300px; background:var(--accent); opacity:.22; bottom:-60px; left:35%; animation-duration:29s; }
+
+  /* ============ MODERN × 90s ============ */
+  body[data-style="retro"]{ background-color:var(--void); background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px); background-size:32px 32px; }
+  body[data-style="retro"]::after{ content:''; position:fixed; inset:0; pointer-events:none; z-index:200; background:repeating-linear-gradient(0deg,rgba(0,0,0,.14) 0 1px,transparent 1px 3px); opacity:.45; }
+  body[data-style="retro"] .sidebar,
+  body[data-style="retro"] .main{ border:2px solid var(--silver); border-radius:0; box-shadow:6px 6px 0 var(--accent); -webkit-backdrop-filter:none; backdrop-filter:none; }
+  body[data-style="retro"] .sidebar{ background:color-mix(in srgb,var(--ink) 80%,transparent); }
+  body[data-style="retro"] .main{ background:color-mix(in srgb,var(--ink) 62%,transparent); }
+  body[data-style="retro"] :is(.new-series-btn,.new-season-btn,.fmt-btn,.font-select,.bg-anim-select,.char-add,.img-add-label,.auth-input,.auth-btn,.status-toggle,.save-pill,.menu-toggle,.version-badge,.toast,.series-head,.note-card,.char-card,.img-card,.motion-switch,#exportBtn,.tab.active),
+  body[data-style="retro"] :is(.new-series-btn,#exportBtn,.auth-btn-primary,.episode.active){
+    -webkit-backdrop-filter:none; backdrop-filter:none; border:2px solid var(--silver); border-radius:0;
+    background:var(--panel); color:var(--silver); box-shadow:3px 3px 0 var(--accent); text-shadow:none;
+  }
+  body[data-style="retro"] :is(.new-series-btn,#exportBtn,.auth-btn-primary,.episode.active){ background:var(--accent); color:var(--void); }
+  body[data-style="retro"] :is(.new-series-btn,.new-season-btn,.fmt-btn,.char-add,.img-add-label,.auth-btn,#exportBtn,.series-head):hover{ transform:translate(1px,1px); box-shadow:2px 2px 0 var(--accent); }
+  body[data-style="retro"] :is(.new-series-btn,.new-season-btn,.fmt-btn,.char-add,.img-add-label,.auth-btn,#exportBtn,.series-head):active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--accent); }
+  body[data-style="retro"] .tab{ border:2px solid transparent; }
+  body[data-style="retro"] .tab.active{ background:var(--accent); color:var(--void); }
+  body[data-style="retro"] .auth-btn-ghost{ border:none !important; background:none !important; box-shadow:none !important; }
+  body[data-style="retro"] .brand{ background:linear-gradient(90deg,var(--accent),var(--accent-dim)); border-bottom:2px solid var(--silver); padding:12px 16px; }
+  body[data-style="retro"] .brand-text .b1,
+  body[data-style="retro"] .brand-text .b2{ color:#fff; text-shadow:1px 1px 0 rgba(0,0,0,.55); }
+  body[data-style="retro"] .brand-row::after{ content:'_ □ x'; margin-left:auto; align-self:flex-start; font:700 11px 'JetBrains Mono',monospace; color:#fff; letter-spacing:.1em; border:2px outset #ddd; background:rgba(0,0,0,.25); padding:1px 5px; }
+  body[data-style="retro"] .brand-icon{ border-radius:0; }
+  body[data-style="retro"] .sidebar,
+  body[data-style="retro"] .tab,
+  body[data-style="retro"] .crumb,
+  body[data-style="retro"] .fmt-btn,
+  body[data-style="retro"] .editor-footer,
+  body[data-style="retro"] .save-pill,
+  body[data-style="retro"] .status-opt{ font-family:'JetBrains Mono',monospace; }
+  body[data-style="retro"] .series-title,
+  body[data-style="retro"] .ep-title-input,
+  body[data-style="retro"] .note-card h3{ font-weight:800; text-transform:none; }
+  body[data-style="retro"] .episode{ border-radius:0; }
+  body[data-style="retro"] .episode.half{ border-radius:0; }
+  body[data-style="retro"] .editor-scroll::-webkit-scrollbar-thumb,
+  body[data-style="retro"] .tree-wrap::-webkit-scrollbar-thumb{ border-radius:0; background:var(--accent); }
+
+  @media (max-width: 820px){
+    .sidebar{ background:color-mix(in srgb,var(--ink) 86%,transparent); -webkit-backdrop-filter:blur(22px) saturate(160%); backdrop-filter:blur(22px) saturate(160%); }
+    body[data-style="retro"] .sidebar{ background:var(--ink); }
+  }
+
+  /* ============ v1.8: puan, kapak, arama, sürükle-bırak ============ */
+  .ep-cover{ width:56px; height:56px; border-radius:14px; flex-shrink:0; background-size:cover; background-position:center; border:1px solid var(--g-bd); display:none; box-shadow:var(--g-sh); }
+  .ep-thumb{ width:22px; height:22px; border-radius:6px; flex-shrink:0; background-size:cover; background-position:center; border:1px solid var(--g-bd); }
+  .img-cover{ background:none; border:none; color:var(--accent); font-size:11.5px; cursor:pointer; padding:0 0 6px; display:block; }
+  .tree-search{ width:100%; margin-bottom:10px; padding:9px 13px; border-radius:12px; font:inherit; font-size:12.5px; color:var(--silver); outline:none;
+    background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.03)),var(--g-bg); border:1px solid var(--g-bd);
+    -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); box-shadow:var(--g-hl); }
+  .tree-search:focus{ border-color:var(--accent); }
+  .tree-search::placeholder{ color:var(--silver-dim); }
+  .episode.drop-before{ box-shadow:0 -2px 0 var(--accent); }
+  .episode.drop-after{ box-shadow:0 2px 0 var(--accent); }
+  .episode.dragging{ opacity:.4; }
+  .episode[draggable="true"]{ cursor:grab; }
+  body[data-style="retro"] .tree-search, body[data-style="retro"] .ep-cover, body[data-style="retro"] .ep-thumb{ border:2px solid var(--silver); border-radius:0; -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow:none; }
+
+  /* ============ v1.9: ondalıklı puan, seri kapağı, yeni açılış ============ */
+  .series-cover{ position:relative; flex-shrink:0; display:flex; }
+  .series-cover-btn{ width:30px; height:30px; padding:0; border-radius:9px; border:1px dashed var(--g-bd); background:var(--g-bg) center/cover no-repeat; color:var(--silver-dim); cursor:pointer; font-size:15px; line-height:1; }
+  .series-cover.has .series-cover-btn{ border-style:solid; }
+  .series-cover-x{ position:absolute; top:-5px; right:-5px; width:15px; height:15px; padding:0; border:none; border-radius:50%; background:var(--danger); color:#fff; font-size:10px; line-height:1; cursor:pointer; display:none; }
+  .series-cover:hover .series-cover-x{ display:block; }
+  @media (hover:none){ .series-cover-x{ display:block; } }
+  body[data-style="retro"] .series-cover-btn, body[data-style="retro"] .series-cover-x{ border-radius:0; }
+
+  .sp-glow{ position:absolute; width:420px; height:420px; border-radius:50%; background:radial-gradient(circle,color-mix(in srgb,var(--accent) 34%,transparent),transparent 65%); animation:sp-breathe 2.4s ease-in-out infinite; }
+  .sp-moonwrap{ position:relative; width:112px; height:112px; display:flex; align-items:center; justify-content:center; margin-bottom:26px; }
+  .sp-ring{ position:absolute; inset:0; width:100%; height:100%; animation:sp-spin 1.5s linear infinite; }
+  .sp-ring circle{ fill:none; stroke-width:1.6; }
+  .sp-ring .track{ stroke:var(--line); }
+  .sp-ring .arc{ stroke:var(--accent); stroke-linecap:round; stroke-dasharray:70 220; }
+  .sp-orbit{ position:absolute; inset:-6px; animation:sp-spin 2.6s linear infinite reverse; }
+  .sp-orbit i{ position:absolute; top:0; left:50%; width:7px; height:7px; margin-left:-3.5px; border-radius:50%; background:var(--gold); box-shadow:0 0 14px var(--gold); }
+  .sp-moon{ width:50px; height:50px; animation:sp-breathe 2.4s ease-in-out infinite; filter:drop-shadow(0 0 14px color-mix(in srgb,var(--gold) 55%,transparent)); }
+  @keyframes sp-spin{ to{ transform:rotate(360deg); } }
+  @keyframes sp-breathe{ 0%,100%{ transform:scale(.94); opacity:.8; } 50%{ transform:scale(1.06); opacity:1; } }
+  .sp-title{ position:relative; font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:36px; letter-spacing:-.01em; color:var(--silver); }
+  .sp-title span{ display:inline-block; opacity:0; transform:translateY(16px) scale(.9); animation:sp-letter .6s cubic-bezier(.2,.8,.2,1) calc(.2s + var(--i) * .055s) forwards; }
+  @keyframes sp-letter{ to{ opacity:1; transform:none; } }
+  .sp-pill{ position:relative; width:200px; height:6px; border-radius:99px; margin-top:26px; overflow:hidden; background:var(--g-bg); border:1px solid var(--g-bd); }
+  .sp-pill span{ display:block; height:100%; width:0; border-radius:99px; background:linear-gradient(90deg,var(--accent),var(--gold),var(--accent)); background-size:200% 100%; animation:sp-load 1.3s cubic-bezier(.3,.7,.2,1) .45s forwards, sp-shine 1s linear infinite; }
+  @keyframes sp-load{ to{ width:100%; } }
+  @keyframes sp-shine{ to{ background-position:-200% 0; } }
+  body.no-motion .sp-title span{ opacity:1; transform:none; }
+  body.no-motion .sp-pill span{ width:100%; }
+  body[data-style="retro"] .sp-pill, body[data-style="retro"] .sp-pill span{ border-radius:0; }
+  body[data-style="retro"] .sp-pill{ border:2px solid var(--silver); }
+
+  /* Odak modu: sadece başlık, yazı alanı ve çıkış düğmesi */
+  body.zen .rate-row, body.zen .status-toggle, body.zen #moveUp, body.zen #moveDown,
+  body.zen .ep-cover, body.zen .ep-meta, body.zen .crumb{ display:none !important; }
+  body.zen .topbar{ padding:16px 20px 6px; flex-wrap:nowrap; align-items:center; }
+  body.zen .ep-title-input{ font-size:22px; }
+
+  /* ============ v2.0: mobil düzen düzeltmeleri, alt çubuk, panel ============ */
+  .editor-footer{ justify-content:flex-start; align-items:center; flex-wrap:wrap; gap:10px; padding:10px 20px; }
+  .editor-footer .wc{ white-space:nowrap; cursor:pointer; }
+  .goal{ flex:1; min-width:40px; max-width:120px; height:4px; border-radius:9px; background:var(--g-bg); border:1px solid var(--g-bd); overflow:hidden; }
+  .goal i{ display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),var(--gold)); transition:width .4s; }
+  .hint-btn{ padding:3px 10px; border-radius:999px; font:inherit; font-size:11.5px; color:var(--silver); background:var(--g-bg); border:1px solid var(--g-bd); cursor:pointer; }
+  #pomoBtn{ margin-left:auto; }
+  body.zen #hintBtn{ display:none !important; }
+  .empty-state{ overflow-y:auto; padding:30px 20px; justify-content:safe center; }
+  .dash{ width:100%; max-width:520px; margin-top:22px; display:flex; flex-direction:column; gap:10px; }
+  .dash-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .dash-card{ padding:14px 6px; border-radius:16px; background:var(--g-bg); border:1px solid var(--g-bd); text-align:center; }
+  .dash-card b{ display:block; font-size:20px; font-family:'Bricolage Grotesque',sans-serif; color:var(--silver); }
+  .dash-card span{ font-size:11px; color:var(--silver-dim); }
+  .dash .fmt-btn{ width:100%; padding:10px 14px; text-align:center; }
+  body[data-style="retro"] .hint-btn, body[data-style="retro"] .dash-card, body[data-style="retro"] .goal{ border-radius:0; border-width:2px; }
+  @media (max-width: 820px){
+    .tb-main{ flex:1 1 100%; }
+    .topbar.has-cover .tb-main{ flex-basis:calc(100% - 72px); }
+    .topbar .ep-meta{ display:none; }
+    .topbar .fmt-btn{ padding:6px 12px; font-size:12px; }
+    .editor-footer{ padding:8px 14px; gap:8px; font-size:11px; }
+    .dash-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+
+  /* ============ v2.1: tik işareti, çıkış tarihi / etiketler, daha cam ============ */
+  #hintBtn{ margin-left:auto; }
+  .ep-status-dot{ width:18px !important; height:18px !important; min-width:18px; padding:0 !important; border-radius:50% !important; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; line-height:1; color:transparent; }
+  .ep-status-dot.done{ background:var(--ok); border-color:var(--ok); color:#fff; box-shadow:0 0 10px color-mix(in srgb,var(--ok) 55%,transparent); }
+  .ep-status-dot.done::after{ content:'✓'; }
+  .episode-name{ display:flex; flex-direction:column; min-width:0; }
+  .ep-t{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ep-sub{ font-size:10px; color:var(--silver-dim); white-space:nowrap; }
+  .episode.active .ep-sub{ color:inherit; opacity:.8; }
+  .tg-final{ --tc:#f5c518; } .tg-sezonfinal{ --tc:#ff8f6b; } .tg-ara{ --tc:#6fa8ff; } .tg-birakildi{ --tc:#ff6b6b; }
+  .ep-sub b{ color:var(--tc); font-weight:700; }
+  .ep-tag{ flex-shrink:0; white-space:nowrap; font-size:9.5px; font-weight:700; padding:1px 7px; border-radius:99px; color:var(--tc); border:1px solid color-mix(in srgb,var(--tc) 50%,transparent); background:color-mix(in srgb,var(--tc) 14%,transparent); }
+  .meta-row{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:8px; }
+  .date-wrap{ display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--silver-dim); }
+  .date-input{ padding:5px 9px; border-radius:10px; font:inherit; font-size:12.5px; color:var(--silver); background:var(--g-bg); border:1px solid var(--g-bd); outline:none; }
+  .tag-chip{ padding:5px 12px; border-radius:999px; font:inherit; font-size:11.5px; cursor:pointer; color:var(--tc); background:color-mix(in srgb,var(--tc) 10%,transparent); border:1px solid color-mix(in srgb,var(--tc) 40%,transparent); transition:background .15s, transform .15s; }
+  .tag-chip:hover{ transform:translateY(-1px); }
+  .tag-chip.on{ background:color-mix(in srgb,var(--tc) 32%,transparent); font-weight:700; box-shadow:var(--g-hl); }
+  body.zen .meta-row{ display:none !important; }
+  body[data-style="retro"] .tag-chip, body[data-style="retro"] .ep-tag, body[data-style="retro"] .date-input{ border-radius:0; border-width:2px; }
+
+  /* daha cam gibi */
+  :root{
+    --g-bg:color-mix(in srgb,var(--silver) 5%,transparent);
+    --g-bd:color-mix(in srgb,var(--silver) 30%,transparent);
+    --g-hl:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(255,255,255,.12),inset 0 14px 18px -14px rgba(255,255,255,.4),inset 0 0 18px rgba(255,255,255,.05);
+  }
+  .new-series-btn,.new-season-btn,.fmt-btn,.font-select,.bg-anim-select,.char-add,.img-add-label,.auth-input,.auth-btn,.status-toggle,.save-pill,.menu-toggle,.version-badge,.toast,.series-head,.note-card,.char-card,.img-card,.motion-switch,#exportBtn,.tab.active,.tree-search{
+    background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.02) 55%,rgba(255,255,255,.08)),var(--g-bg);
+    -webkit-backdrop-filter:blur(22px) saturate(210%) brightness(1.1); backdrop-filter:blur(22px) saturate(210%) brightness(1.1);
+  }
+  .new-series-btn,#exportBtn,.auth-btn-primary,.episode.active{
+    -webkit-backdrop-filter:blur(22px) saturate(210%) brightness(1.1); backdrop-filter:blur(22px) saturate(210%) brightness(1.1);
+  }
+  @media (max-width: 820px){ .meta-row{ gap:6px; } }
+
+  /* ============ v2.2: cam eski haline, Detay paneli, Araçlar paneli ============ */
+  :root{
+    --g-bg:color-mix(in srgb,var(--silver) 9%,transparent);
+    --g-bd:color-mix(in srgb,var(--silver) 22%,transparent);
+    --g-hl:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(255,255,255,.05),inset 0 0 16px rgba(255,255,255,.04);
+  }
+  .new-series-btn,.new-season-btn,.fmt-btn,.font-select,.bg-anim-select,.char-add,.img-add-label,.auth-input,.auth-btn,.status-toggle,.save-pill,.menu-toggle,.version-badge,.toast,.series-head,.note-card,.char-card,.img-card,.motion-switch,#exportBtn,.tab.active,.tree-search{
+    background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.03)),var(--g-bg);
+    -webkit-backdrop-filter:blur(16px) saturate(180%); backdrop-filter:blur(16px) saturate(180%);
+  }
+  .new-series-btn,#exportBtn,.auth-btn-primary,.episode.active{ -webkit-backdrop-filter:blur(16px) saturate(180%); backdrop-filter:blur(16px) saturate(180%); }
+
+  .info-panel{ display:none; flex-direction:column; gap:10px; padding:4px 34px 14px; border-bottom:1px solid var(--line); }
+  .info-panel.open{ display:flex; }
+  .info-line{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:11.5px; color:var(--silver-dim); }
+  .info-panel .meta-row{ margin-top:0; }
+  .format-bar{ margin-bottom:10px; }
+  .editor-inner:not(.tools-open) .tool-item, .editor-inner:not(.tools-open) .color-bar{ display:none !important; }
+  [data-act="bold"]{ font-weight:800; }
+  body.zen .info-panel, body.zen #infoBtn{ display:none !important; }
+  @media (max-width: 820px){ .info-panel{ padding:2px 14px 12px; } }
+
+  /* ============ v2.3: Detay düğmesi çakışması + performans ============ */
+  @media (max-width: 820px){
+    .topbar{ flex-wrap:wrap; }
+    .tb-main{ flex:1 1 100% !important; }
+    .topbar.has-cover .tb-main{ flex-basis:calc(100% - 72px) !important; }
+  }
+  body.zen .tb-main{ flex:1 1 0 !important; }
+  /* Hareketli arka plan üstünde her karede bulanıklık hesaplamasın: büyük/çok sayıdaki yüzeylerde blur kapalı, küçük düğmelerde hafif */
+  .series-head,.note-card,.char-card,.img-card,.tree-search,.version-badge,.status-toggle,.save-pill,.toast,.font-select,.bg-anim-select,.motion-switch,.auth-input{
+    -webkit-backdrop-filter:none !important; backdrop-filter:none !important;
+  }
+  .new-series-btn,.new-season-btn,.fmt-btn,.menu-toggle,.tab.active,#exportBtn,.auth-btn,.episode.active{
+    -webkit-backdrop-filter:blur(8px) saturate(160%) !important; backdrop-filter:blur(8px) saturate(160%) !important;
+  }
+  body.zen .fmt-btn,body.zen .save-pill{ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+
+  /* ============ v2.4: Luna Studio ============ */
+  .b1 em, .auth-title em{ font-style:normal; color:var(--accent); }
+  .sp-moon{ width:54px; height:54px; filter:drop-shadow(0 0 14px color-mix(in srgb,var(--accent) 60%,transparent)); }
+  .dm-eye{ transform-box:fill-box; transform-origin:center; animation:dm-blink 3.6s infinite; }
+  @keyframes dm-blink{ 0%,92%,100%{ transform:scaleY(1); } 95%{ transform:scaleY(.15); } }
+  .sp-orbit i{ background:var(--accent); box-shadow:0 0 14px var(--accent); }
+
+  /* ============ v3.0: kutucuklar, hafif mod, Luna ============ */
+  .todo{ display:flex; align-items:center; gap:8px; margin:4px 0; }
+  .todo-cb{ width:17px; height:17px; accent-color:var(--accent); flex-shrink:0; cursor:pointer; }
+  .todo.done{ opacity:.55; text-decoration:line-through; }
+  .editor-ce ruby rt{ font-size:.55em; color:var(--silver-dim); }
+  .sp-moon{ filter:drop-shadow(0 0 14px color-mix(in srgb,var(--gold) 55%,transparent)); }
+  .sp-orbit i{ background:var(--gold); box-shadow:0 0 14px var(--gold); }
+  body.lite, body.no-motion{ background:var(--void); }
+  body.lite *, body.no-motion *{ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; text-shadow:none !important; }
+  body.lite *{ transition:none !important; box-shadow:none !important; }
+  body.lite .bg-ambience{ display:none; }
+  body.lite .fmt-btn, body.lite .series-head, body.lite .note-card, body.lite .char-card, body.lite .img-card{ background:var(--panel); }
+  body.lite .sidebar, body.lite .main{ background:var(--ink); }
+
+  /* ============ v3.1: yazı türüne göre araçlar, seri bilgisi, okuma modu ============ */
+  .editor-inner.kind-script [data-k]:not([data-k~="script"]),
+  .editor-inner.kind-novel [data-k]:not([data-k~="novel"]),
+  .editor-inner.kind-manga [data-k]:not([data-k~="manga"]){ display:none !important; }
+  .modal-back{ position:fixed; inset:0; z-index:300; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(0,0,0,.55); }
+  .modal{ width:100%; max-width:440px; max-height:92dvh; overflow-y:auto; display:flex; flex-direction:column; gap:12px; padding:22px; border-radius:22px; background:var(--ink); border:1px solid var(--g-bd); color:var(--silver); }
+  .modal h3{ margin:0 0 4px; font-family:'Bricolage Grotesque',sans-serif; font-size:20px; }
+  .modal label{ display:flex; flex-direction:column; gap:5px; font-size:12px; color:var(--silver-dim); }
+  .modal input, .modal select, .modal textarea{ padding:9px 12px; border-radius:12px; font:inherit; font-size:14px; color:var(--silver); background:var(--g-bg); border:1px solid var(--g-bd); outline:none; resize:vertical; }
+  .modal input:focus, .modal select:focus, .modal textarea:focus{ border-color:var(--accent); }
+  .modal-row{ display:flex; gap:8px; align-items:center; }
+  .reader{ position:fixed; inset:0; z-index:290; display:flex; flex-direction:column; background:var(--void); color:var(--silver); }
+  .reader-bar{ display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid var(--line); }
+  .reader-title{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center; font-size:13px; color:var(--silver-dim); }
+  .reader-body{ flex:1; overflow-y:auto; width:100%; max-width:680px; margin:0 auto; padding:28px 20px 80px; font-family:var(--editor-font,'Literata',serif); font-size:calc(var(--editor-size,17px) + 1px); line-height:1.95; }
+  .reader-body h1{ text-align:center; font-size:1.4em; margin:0 0 1.5em; }
+  .reader-body p{ margin:0 0 .9em; text-indent:1.2em; }
+  .reader-body p.gap{ height:1em; margin:0; }
+  .reader button:disabled{ opacity:.35; }
+  body.lite .modal-back{ background:rgba(0,0,0,.75); }
+
+  /* ============ v3.2: sade ana menü ============ */
+  .settings-box{ margin-top:14px; }
+  .settings-box summary{ cursor:pointer; list-style:none; font-size:12.5px; color:var(--silver-dim); padding:8px 12px; border-radius:12px; background:var(--g-bg); border:1px solid var(--g-bd); }
+  .settings-box summary::-webkit-details-marker{ display:none; }
+  .settings-box[open] summary{ color:var(--accent); }
+  .settings-box > *:not(summary){ margin-top:10px; }
+  .dash{ gap:12px; }
+  .dash-series{ display:flex; align-items:center; gap:12px; padding:12px; border-radius:18px; background:var(--g-bg); border:1px solid var(--g-bd); }
+  .dash-cover{ width:44px; height:58px; border-radius:10px; flex-shrink:0; background:var(--panel) center/cover no-repeat; border:1px solid var(--g-bd); }
+  .dash-info{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .dash-info b{ font-family:'Bricolage Grotesque',sans-serif; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .dash-info small{ font-size:11.5px; color:var(--silver-dim); }
+  .dash-info small:empty{ display:none; }
+  .dash-actions{ display:flex; gap:6px; flex-shrink:0; }
+  .dash .dash-actions .fmt-btn{ width:auto; padding:6px 10px; font-size:11.5px; }
+  @media (max-width: 820px){ .dash-series{ flex-wrap:wrap; } .dash-actions{ width:100%; } .dash .dash-actions .fmt-btn{ flex:1; } }
+
+  /* ============ v3.3: ana sayfa, seri sayfası, künye ============ */
+  .home, .spage{ padding:22px 26px 60px; max-width:1100px; margin:0 auto; }
+  .hero{ position:relative; height:380px; border-radius:26px; overflow:hidden; border:1px solid var(--g-bd); background:var(--panel); }
+  .slide{ position:absolute; inset:0; opacity:0; transform:translateX(40px); transition:opacity .6s ease, transform .6s ease; pointer-events:none; }
+  .slide.prev{ transform:translateX(-40px); }
+  .slide.active{ opacity:1; transform:none; pointer-events:auto; }
+  .slide-bg{ position:absolute; inset:-24px; background:var(--panel) center/cover no-repeat; filter:blur(26px) brightness(.42) saturate(1.2); }
+  .slide-card{ position:relative; display:flex; align-items:center; gap:26px; height:100%; padding:28px 32px; }
+  .slide-cover{ width:200px; aspect-ratio:2/3; flex-shrink:0; border-radius:16px; background:var(--panel-2) center/cover no-repeat; border:1px solid var(--g-bd); box-shadow:0 18px 40px rgba(0,0,0,.45); }
+  .slide-info, .sp-info{ flex:1; min-width:0; display:flex; flex-direction:column; gap:9px; }
+  .slide-info h2, .sp-info h1{ margin:0; font-family:'Bricolage Grotesque',sans-serif; font-size:32px; line-height:1.1; letter-spacing:-.02em; }
+  .by{ font-size:13px; color:var(--silver-dim); }
+  .syn{ margin:0; font-size:13.5px; line-height:1.6; color:var(--silver); opacity:.88; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .syn.full{ -webkit-line-clamp:unset; display:block; }
+  .meta{ display:flex; gap:14px; font-size:12px; color:var(--silver-dim); }
+  .chips{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .chip{ font-size:10.5px; font-weight:700; padding:2px 9px; border-radius:99px; background:color-mix(in srgb,var(--accent) 22%,transparent); color:var(--accent); border:1px solid color-mix(in srgb,var(--accent) 45%,transparent); }
+  .chip.ghost{ background:none; color:var(--silver-dim); border-color:var(--g-bd); font-weight:500; }
+  .acts{ display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+  .acts .primary{ color:var(--accent); font-weight:700; }
+  .hero-nav{ position:absolute; right:18px; bottom:14px; z-index:3; display:flex; align-items:center; gap:8px; }
+  .hero-nav .fmt-btn{ padding:4px 12px; font-size:16px; }
+  .dots i{ display:inline-block; width:7px; height:7px; margin:0 3px; border-radius:9px; background:var(--silver-dim); opacity:.45; transition:width .3s, opacity .3s, background .3s; }
+  .dots i.on{ width:20px; opacity:1; background:var(--accent); }
+  .home-h{ margin:28px 0 14px; font-family:'Bricolage Grotesque',sans-serif; font-size:18px; }
+  .series-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:18px; }
+  .scard{ display:flex; flex-direction:column; gap:3px; text-align:left; background:none; border:none; color:var(--silver); cursor:pointer; padding:0; font:inherit; transition:transform .25s ease; animation:card-in .5s ease backwards; }
+  .scard:hover{ transform:translateY(-5px); }
+  .scard{ animation-delay:calc(var(--i, 0) * 60ms); }
+  @keyframes card-in{ from{ opacity:0; transform:translateY(14px); } }
+  .scard-cover{ aspect-ratio:2/3; border-radius:14px; background:var(--panel-2) center/cover no-repeat; border:1px solid var(--g-bd); margin-bottom:6px; display:flex; align-items:center; justify-content:center; font-size:34px; color:var(--silver-dim); }
+  .scard b{ font-family:'Bricolage Grotesque',sans-serif; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .scard small{ font-size:11.5px; color:var(--silver-dim); } .scard small:empty{ display:none; }
+  .sp-head{ display:flex; gap:26px; margin:18px 0 26px; }
+  .sp-season h4{ margin:20px 0 8px; font-family:'Bricolage Grotesque',sans-serif; font-size:15px; color:var(--accent); }
+  .sp-ch{ display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; margin-bottom:6px; text-align:left; border-radius:12px; font:inherit; font-size:13.5px; color:var(--silver); background:var(--g-bg); border:1px solid var(--g-bd); cursor:pointer; transition:transform .15s, background .15s; }
+  .sp-ch:hover{ transform:translateX(4px); background:var(--panel-2); }
+  .sp-ch .n{ min-width:30px; color:var(--silver-dim); font-weight:700; }
+  .sp-ch .t{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .sp-ch small{ color:var(--silver-dim); font-size:11px; }
+  .tick{ width:16px; height:16px; border-radius:50%; border:1.5px solid var(--silver-dim); flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; color:#fff; }
+  .tick.done{ background:var(--ok); border-color:var(--ok); } .tick.done::after{ content:'✓'; }
+  .muted{ color:var(--silver-dim); font-size:12.5px; }
+  .ed-credits{ margin:26px 0 10px; padding-top:14px; border-top:1px dashed var(--line); text-align:center; font-size:12px; color:var(--silver-dim); cursor:pointer; line-height:1.7; }
+  .ed-credits .end, .reader-end{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; opacity:.7; margin-bottom:6px; }
+  .reader-end{ text-align:center; margin-top:40px; }
+  .reader-credits{ text-align:center; font-size:.8em; opacity:.7; line-height:1.7; margin-top:6px; }
+  body.lite .slide-bg{ filter:none; opacity:.25; }
+  body.lite .slide{ transition:none; }
+  @media (max-width: 820px){
+    .home, .spage{ padding:14px 14px 50px; }
+    .hero{ height:560px; }
+    .slide-card{ flex-direction:column; align-items:flex-start; padding:20px; gap:14px; overflow:hidden; }
+    .slide-cover{ width:116px; }
+    .slide-info h2, .sp-info h1{ font-size:24px; }
+    .sp-head{ flex-direction:column; gap:14px; }
+    .series-grid{ grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:12px; }
+  }
+
+  /* v3.3.1: ana sayfa genişlik + kaydırma düzeltmesi */
+  #mainContent.scroll{ overflow-y:auto; overflow-x:hidden; }
+  .home, .spage{ width:100%; box-sizing:border-box; flex-shrink:0; }
+  .hero{ width:100%; }
+  @media (max-width: 820px){ .home, .spage{ padding-top:66px; } }
+
+  /* ============ v3.4: şifre sıfırlama, yeni ana sayfa, geçiş animasyonları ============ */
+  .auth-link{ align-self:flex-end; background:none; border:none; padding:0 2px; margin:-2px 0 2px; font:inherit; font-size:12px; color:var(--silver-dim); cursor:pointer; }
+  .auth-link:hover{ color:var(--accent); }
+  .auth-error.ok{ color:var(--ok); }
+  .tg-devam{ --tc:#4ade80; }
+  #mainContent.vin > *{ animation:view-in .5s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes view-in{ from{ opacity:0; transform:translateY(16px) scale(.985); filter:blur(6px); } to{ opacity:1; transform:none; filter:blur(0); } }
+  .home-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+  .home-top h1{ margin:0; font-family:'Bricolage Grotesque',sans-serif; font-size:30px; letter-spacing:-.02em; }
+  .slide.active .slide-bg{ animation:kb 9s ease-out both; }
+  @keyframes kb{ from{ transform:scale(1.12); } to{ transform:scale(1); } }
+  .slide.active .slide-cover{ animation:cover-in .8s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes cover-in{ from{ opacity:0; transform:translateX(-24px) rotate(-3deg) scale(.94); } to{ opacity:1; transform:none; } }
+  .slide.active .slide-info > *{ animation:rise .6s cubic-bezier(.2,.8,.2,1) both; }
+  .slide.active .slide-info > :nth-child(1){ animation-delay:.12s; } .slide.active .slide-info > :nth-child(2){ animation-delay:.2s; }
+  .slide.active .slide-info > :nth-child(3){ animation-delay:.28s; } .slide.active .slide-info > :nth-child(4){ animation-delay:.36s; }
+  .slide.active .slide-info > :nth-child(5){ animation-delay:.44s; } .slide.active .slide-info > :nth-child(6){ animation-delay:.52s; }
+  @keyframes rise{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
+  .hero-bar{ position:absolute; left:0; right:0; bottom:0; height:3px; background:rgba(255,255,255,.08); z-index:3; }
+  .hero-bar i{ display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),var(--gold)); animation:hbar 6.5s linear forwards; }
+  @keyframes hbar{ to{ width:100%; } }
+  .meta b.lbl, .scard small b.lbl{ font-family:inherit; font-size:inherit; font-weight:700; color:var(--silver); }
+  .resume{ display:flex; align-items:center; gap:14px; width:100%; margin-top:18px; padding:12px 16px; text-align:left; border-radius:20px; font:inherit; color:var(--silver); cursor:pointer; background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.03)),var(--g-bg); border:1px solid var(--g-bd); transition:transform .2s, border-color .2s; }
+  .resume:hover{ transform:translateY(-2px); border-color:var(--accent); }
+  .resume-cover{ width:42px; height:56px; border-radius:9px; flex-shrink:0; background:var(--panel-2) center/cover no-repeat; border:1px solid var(--g-bd); }
+  .resume-txt{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .resume-txt b{ font-family:'Bricolage Grotesque',sans-serif; font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .resume-txt small{ font-size:11.5px; color:var(--silver-dim); }
+  .resume-go{ font-size:22px; color:var(--accent); transition:transform .2s; }
+  .resume:hover .resume-go{ transform:translateX(5px); }
+  .scard-cover{ position:relative; overflow:hidden; }
+  .scard-cover .ph{ font-family:'Bricolage Grotesque',sans-serif; font-size:44px; font-weight:800; color:var(--silver-dim); opacity:.6; }
+  .ep-tag.pos{ position:absolute; top:8px; left:8px; backdrop-filter:blur(6px); background:rgba(0,0,0,.45); }
+  .scard:hover .scard-cover{ border-color:var(--accent); box-shadow:0 14px 30px rgba(0,0,0,.4); }
+  body.lite #mainContent.vin > *, body.lite .slide.active .slide-bg, body.lite .slide.active .slide-cover, body.lite .slide.active .slide-info > *{ animation:none; }
+  @media (prefers-reduced-motion: reduce){ #mainContent.vin > *{ animation:none; } }
+  @media (max-width: 820px){ .home-top h1{ font-size:24px; } }
+</style>
+</head>
+<body data-theme="luna" data-bg-anim="dots">
+
+<div class="splash" id="splash">
+  <div class="sp-glow"></div>
+  <div class="sp-moonwrap">
+    <svg class="sp-ring" viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="46"/><circle class="arc" cx="50" cy="50" r="46"/></svg>
+    <span class="sp-orbit"><i></i></span>
+    <svg class="sp-moon" viewBox="0 0 26 26" fill="none"><path d="M16 3C10.5 4 7 8.6 7 14c0 6.1 4.9 11 11 11 2 0 3.9-.5 5.5-1.5C20 24.6 16.5 20.7 16.5 16c0-4.7 2.9-8.7 6.5-9.8C21.4 4.3 18.8 3.2 16 3Z" fill="var(--gold)"/></svg>
+  </div>
+  <div class="sp-title" aria-label="Luna Studio"><span style="--i:0">L</span><span style="--i:1">u</span><span style="--i:2">n</span><span style="--i:3">a</span><span style="--i:4">&nbsp;</span><span style="--i:5">S</span><span style="--i:6">t</span><span style="--i:7">u</span><span style="--i:8">d</span><span style="--i:9">i</span><span style="--i:10">o</span></div>
+  <div class="splash-sub">SENARYO ATÖLYESİ AÇILIYOR</div>
+  <div class="sp-pill"><span></span></div>
+</div>
+
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <svg class="auth-moon" viewBox="0 0 26 26" fill="none"><path d="M16 3C10.5 4 7 8.6 7 14c0 6.1 4.9 11 11 11 2 0 3.9-.5 5.5-1.5C20 24.6 16.5 20.7 16.5 16c0-4.7 2.9-8.7 6.5-9.8C21.4 4.3 18.8 3.2 16 3Z" fill="var(--gold)"/></svg>
+    <div class="auth-title">Luna Studio</div>
+    <div class="auth-sub">Senaryoların sana özel, güvenli bir hesapta saklansın</div>
+    <input class="auth-input" id="authEmail" type="email" placeholder="E-posta" autocomplete="username">
+    <input class="auth-input" id="authPass" type="password" placeholder="Şifre (en az 6 karakter)" autocomplete="current-password">
+    <button class="auth-link" id="authForgotBtn" type="button">Şifremi unuttum</button>
+    <div class="auth-error" id="authError"></div>
+    <button class="auth-btn auth-btn-primary" id="authLoginBtn">Giriş yap</button>
+    <button class="auth-btn auth-btn-secondary" id="authSignupBtn">Hesap oluştur</button>
+    <div class="auth-divider">veya</div>
+    <button class="auth-btn auth-btn-ghost" id="authGuestBtn">Hesapsız devam et (bu cihazda kalır)</button>
+  </div>
+</div>
+
+<div class="bg-ambience" id="bgAmbience">
+  <div class="bg-orb o1"></div>
+  <div class="bg-orb o2"></div>
+  <div class="bg-orb o3"></div>
+  <div class="bg-sweep"></div>
+  <div class="bg-stars" id="bgStars"></div>
+</div>
+
+<div class="version-badge" id="versionBadge"><span class="dot"></span>Luna Studio · v3.4</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-row">
+        <div class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 26 26" fill="none"><path d="M16 3C10.5 4 7 8.6 7 14c0 6.1 4.9 11 11 11 2 0 3.9-.5 5.5-1.5C20 24.6 16.5 20.7 16.5 16c0-4.7 2.9-8.7 6.5-9.8C21.4 4.3 18.8 3.2 16 3Z" fill="var(--gold)"/></svg>
+        </div>
+        <div class="brand-text">
+          <span class="b1">Luna Studio</span>
+          <span class="b2">SENARYO ATÖLYESİ</span>
+        </div>
+      </div>
+      <details class="settings-box"><summary>⚙ Ayarlar</summary>
+      <div class="theme-row" id="themeRow"></div>
+      <div class="motion-row">
+        <span class="motion-label">Language</span>
+        <select class="bg-anim-select" id="langSelect"><option value="en">English</option><option value="es">Español</option><option value="de">Deutsch</option><option value="ko">한국어</option><option value="ja">日本語</option><option value="tr">Türkçe</option></select>
+      </div>
+      <div class="motion-row">
+        <span class="motion-label">Performans modu</span>
+        <select class="bg-anim-select" id="perfSelect"><option value="auto">Otomatik</option><option value="lite">Hafif</option><option value="full">Tam</option></select>
+      </div>
+      <div class="motion-row">
+        <span class="motion-label">Tasarım stili</span>
+        <select class="bg-anim-select" id="styleSelect">
+          <option value="glass">Cam (modern)</option>
+          <option value="retro">Modern × 90s</option>
+        </select>
+      </div>
+      <div class="motion-row">
+        <span class="motion-label">Arka plan animasyonu</span>
+        <select class="bg-anim-select" id="bgAnimSelect">
+          <option value="dots">Mürekkep benekleri</option>
+          <option value="glow">Yumuşak parıltı</option>
+          <option value="rise">Yükselen parçacıklar</option>
+          <option value="sweep">Kayan ışık</option>
+          <option value="rain">Yağmur</option>
+          <option value="aurora">Aurora</option>
+          <option value="off">Kapalı</option>
+        </select>
+      </div>
+      <div class="motion-row">
+        <span class="motion-label">Sakin mod (tüm animasyonlar kapalı)</span>
+        <button class="motion-switch" id="motionSwitch" title="Animasyonları kapat/aç"><span class="knob"></span></button>
+      </div>
+      <div class="motion-row" style="gap:8px;">
+        <button class="account-link" id="backupExportBtn" style="cursor:pointer;">↓ Yedek indir (.json)</button>
+        <button class="account-link" id="backupImportBtn" style="cursor:pointer;">↑ Yedekten yükle</button>
+        <input type="file" id="backupFileInput" accept="application/json" style="display:none;">
+      </div>
+      </details>
+    </div>
+
+    <div class="tree-wrap">
+      <input class="tree-search" id="treeSearch" type="search" placeholder="Bölüm veya metin ara…" autocomplete="off">
+      <button class="new-series-btn" onclick="addSeries()"><span class="plus">+</span> Yeni seri</button>
+      <div id="seriesList"></div>
+    </div>
+
+    <div class="sidebar-footer-wrap">
+      <div class="motion-row" id="accountRow"></div>
+      <div class="sidebar-footer">
+        <span id="totalStats"><span class="save-dot" id="saveDot"></span>0 seri</span>
+        <span id="clock">—</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <main class="main">
+    <button class="menu-toggle" id="menuToggle" aria-label="Menüyü aç">
+      <span></span><span></span><span></span>
+    </button>
+    <div id="mainContent"></div>
+  </main>
+</div>
+
+<div class="toast" id="toast">Kaydedildi</div>
+<input type="file" id="hiddenImgInput" accept="image/*" style="display:none">
+<input type="file" id="hiddenCharImgInput" accept="image/*" style="display:none">
+<input type="file" id="hiddenSeriesCoverInput" accept="image/*" style="display:none">
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script>
+/* ================= FIREBASE (hesap + cihazlar arası senkron) ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyCeO_f3CiyM7wolrMtiUSb8sVftUdBzaTI",
+  authDomain: "luna-studio-70252.firebaseapp.com",
+  projectId: "luna-studio-70252",
+  storageBucket: "luna-studio-70252.firebasestorage.app",
+  messagingSenderId: "165648845588",
+  appId: "1:165648845588:web:75ab18c0eebd0c1532d001",
+  measurementId: "G-VY6WKKSN83"
+};
+let fbDb = null, fbAuth = null;
+try{
+  firebase.initializeApp(firebaseConfig);
+  fbDb = firebase.firestore();
+  fbAuth = firebase.auth();
+}catch(e){ fbDb = null; fbAuth = null; }
+const FB_COLLECTION = 'luna-studio';
+let currentUser = null;
+
+/* ================= STATE ================= */
+let data = { series: [] };
+let dataLoaded = false; // veri Firebase/localden tam olarak gelene kadar true olmaz —
+                         // bu flag olmadan, sayfa yüklenirken (data hâlâ boşken) sekme
+                         // değiştirme/blur gibi olaylar boş veriyi "en yeni" diye buluta
+                         // yazıp gerçek veriyi silebiliyordu.
+let currentSeriesId = null;
+let currentSeasonId = null;
+let currentEpisodeId = null;
+let currentTab = 'script';
+let saveTimer = null;
+let spellcheckOn = true;
+let autoOn = localStorage.getItem('luna-autocorrect') !== '0';
+let currentFont = 'sans';
+let noMotion = false;
+let currentBgAnim = 'dots';
+let currentTheme = 'luna';
+let pendingCharPhotoId = null;
+
+const STORAGE_KEY = 'luna-studio:project';
+const FONT_MAP = {
+  sans: "'Plus Jakarta Sans', sans-serif",
+  serif: "'Literata', serif",
+  display: "'Bricolage Grotesque', serif",
+  script: "'Courier Prime', monospace",
+  classic: "'Playfair Display', serif",
+  mono: "'JetBrains Mono', monospace",
+  hand: "'Caveat', cursive"
+};
+const THEMES = [
+  {id:'luna', cls:'t-luna', label:'Luna (gece)'},
+  {id:'sakura', cls:'t-sakura', label:'Sakura'},
+  {id:'forest', cls:'t-forest', label:'Orman'},
+  {id:'parchment', cls:'t-parchment', label:'Parşömen (gündüz)'},
+  {id:'midnight', cls:'t-midnight', label:'Gece Mavisi'},
+  {id:'amber', cls:'t-amber', label:'Kehribar'}
+];
+
+function uid(){ return 'id' + Math.random().toString(36).slice(2,10); }
+
+/* ================= STORAGE (with safe fallback) ================= */
+let storageMode = 'unknown'; // 'cloud' | 'firebase' | 'local'
+
+function fbDocId(){ return currentUser ? currentUser.uid : null; }
+function localKey(){ return currentUser ? (STORAGE_KEY + ':' + currentUser.uid) : STORAGE_KEY; }
+
+async function detectStorage(){
+  if(window.storage && typeof window.storage.set === 'function'){
+    try{
+      await window.storage.set('luna-studio:ping', '1');
+      storageMode = 'cloud';
+      return;
+    }catch(e){ /* fall through */ }
+  }
+  if(fbDb && currentUser){
+    storageMode = 'firebase';
+    return;
+  }
+  storageMode = 'local';
+}
+
+// Local yazım HER ZAMAN senkron ve anında olur (network'e bağlı değil),
+// bu yüzden sekme kapansa/yenilense bile en son hâl asla kaybolmaz.
+function writeLocalImmediate(json){
+  try{ localStorage.setItem(localKey(), json); }catch(e){ /* yoksay */ }
+}
+function readLocalTimestamp(json){
+  try{ const d = JSON.parse(json); return d && d.updatedAt ? d.updatedAt : 0; }catch(e){ return 0; }
+}
+
+async function storageGetProject(){
+  const localJson = (()=>{ try{ return localStorage.getItem(localKey()); }catch(e){ return null; } })();
+  const localTs = localJson ? readLocalTimestamp(localJson) : 0;
+
+  if(storageMode === 'cloud'){
+    try{
+      const r = await window.storage.get(STORAGE_KEY);
+      const cloudJson = r && r.value ? r.value : null;
+      const cloudTs = cloudJson ? readLocalTimestamp(cloudJson) : 0;
+      // Hangisi daha yeniyse o kazanır — körü körüne buluta güvenmiyoruz
+      if(cloudJson && cloudTs >= localTs) return cloudJson;
+      if(localJson){ if(cloudJson) storageSetProject(localJson); return localJson; }
+      return cloudJson;
+    }catch(e){
+      storageMode = (fbDb && currentUser) ? 'firebase' : 'local';
+    }
+  }
+  if(storageMode === 'firebase'){
+    try{
+      const doc = await fbDb.collection(FB_COLLECTION).doc(fbDocId()).get();
+      const cloudJson = (doc.exists && doc.data().json) ? doc.data().json : null;
+      const cloudTs = cloudJson ? readLocalTimestamp(cloudJson) : 0;
+      if(cloudJson && cloudTs >= localTs){
+        writeLocalImmediate(cloudJson);
+        return cloudJson;
+      }
+      if(localJson){
+        // Yerelde daha yeni bir sürüm var — buluta bunu geri yaz, eskiyi ezme
+        try{ await fbDb.collection(FB_COLLECTION).doc(fbDocId()).set({ json: localJson, updatedAt: Date.now() }); }catch(e){}
+        return localJson;
+      }
+      // Hesap yeni: daha önce misafir modunda bu cihazda kayıt varsa onu içeri aktar
+      const guestData = (()=>{ try{ return localStorage.getItem(STORAGE_KEY); }catch(e){ return null; } })();
+      if(guestData){
+        try{ await fbDb.collection(FB_COLLECTION).doc(fbDocId()).set({ json: guestData, updatedAt: Date.now() }); }catch(e){}
+        writeLocalImmediate(guestData);
+        return guestData;
+      }
+      return null;
+    }catch(e){
+      // internet yoksa yerelden devam et, bağlantı gelince tekrar dener
+    }
+  }
+  return localJson;
+}
+
+async function storageSetProject(json){
+  writeLocalImmediate(json); // önce her zaman anında yerel kayıt — asıl güvenlik ağı bu
+  if(storageMode === 'cloud'){
+    try{
+      await window.storage.set(STORAGE_KEY, json);
+      return true;
+    }catch(e){
+      storageMode = (fbDb && currentUser) ? 'firebase' : 'local';
+    }
+  }
+  if(storageMode === 'firebase'){
+    try{
+      await fbDb.collection(FB_COLLECTION).doc(fbDocId()).set({ json, updatedAt: Date.now() });
+      return true;
+    }catch(e){
+      console.error('Firestore kayıt hatası:', e);
+      return false; // yerelde zaten kaydedildi ama BULUTA gitmedi — bunu gizleme
+    }
+  }
+  return true;
+}
+
+
+async function loadData(){
+  await detectStorage();
+  const badge = document.getElementById('versionBadge');
+  if(badge){
+    const label = storageMode === 'firebase' ? 'Bulut senkron aktif' : storageMode === 'cloud' ? 'Bulut' : 'Bu cihazda kayıtlı';
+    badge.innerHTML = `<span class="dot"></span>Luna Studio · v3.4 · ${label}`;
+  }
+  try{
+    const raw = await storageGetProject();
+    if(raw) data = JSON.parse(raw);
+  }catch(e){ /* start fresh */ }
+  if(!data.series) data.series = [];
+  data.series.forEach(se=>(se.seasons || []).forEach(x=>(x.episodes || []).forEach(e=>{ delete e.rating; })));
+  if(data.seasons && data.seasons.length && data.series.length===0){
+    data.series.push({ id: uid(), title: 'Seri 1', open:true, seasons: data.seasons });
+    delete data.seasons;
+  }
+  // migrate episodes missing new fields
+  data.series.forEach(ser=>ser.seasons.forEach(s=>s.episodes.forEach(e=>{
+    if(!e.status) e.status = 'devam';
+    if(!e.images) e.images = [];
+    if(!e.characters) e.characters = [];
+  })));
+
+  const sc = localStorage.getItem('luna-spellcheck');
+  if(sc !== null) spellcheckOn = sc === '1';
+  const f = localStorage.getItem('luna-font');
+  if(f && FONT_MAP[f]) currentFont = f;
+  const th = localStorage.getItem('luna-theme');
+  if(th && THEMES.some(t=>t.id===th)) currentTheme = th;
+  const nm = localStorage.getItem('luna-motion');
+  if(nm !== null) noMotion = nm === '1';
+  const ba = localStorage.getItem('luna-bg-anim');
+  if(ba) currentBgAnim = ba;
+
+  applyTheme();
+  applyFont();
+  applyMotion();
+  applyBgAnim();
+  render();
+  dataLoaded = true; // artık save fonksiyonları güvenle çalışabilir
+}
+
+async function saveData(){
+  if(!dataLoaded) return; // veri henüz yüklenmeden asla kaydetme — boşu buluta yazma riski
+  data.updatedAt = Date.now();
+  setSaveState(true);
+  const ok = await storageSetProject(JSON.stringify(data));
+  setSaveState(false);
+  if(!ok) flashToast('⚠️ Sadece bu cihazda kaydedildi, buluta senkron OLMADI');
+}
+
+function setSaveState(saving){
+  const dot = document.getElementById('saveDot');
+  const pill = document.getElementById('savePill');
+  if(dot) dot.classList.toggle('saving', saving);
+  if(pill){
+    pill.textContent = saving ? '● kaydediliyor…' : '● kaydedildi';
+    pill.classList.toggle('saving', saving);
+  }
+}
+
+let localTimer = null;
+function flushLocal(){
+  if(!dataLoaded) return;
+  clearTimeout(localTimer); localTimer = null;
+  try{ writeLocalImmediate(JSON.stringify(data)); }catch(e){}
+}
+function scheduleSave(){
+  if(!dataLoaded) return;
+  data.updatedAt = Date.now();
+  clearTimeout(localTimer); localTimer = setTimeout(flushLocal, 700);
+  clearTimeout(saveTimer);
+  setSaveState(true);
+  saveTimer = setTimeout(()=>saveData(), 1500);
+}
+function saveNow(){
+  if(!dataLoaded) return;
+  flushLocal();
+  clearTimeout(saveTimer);
+  saveData();
+}
+window.addEventListener('pagehide', flushLocal);
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) flushLocal(); });
+function flashToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1600);
+}
+
+/* ================= MANUEL YEDEK (indir / yükle) =================
+   Bulut senkronu (Firebase) başarısız olsa bile, kullanıcı bu dosyayı
+   indirip başka bir cihazda yükleyerek verisini elle taşıyabilir. */
+function exportBackup(){
+  try{
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');
+    a.href = url;
+    a.download = `luna-studio-yedek-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    flashToast('Yedek indirildi');
+  }catch(e){ flashToast('Yedek indirilemedi'); }
+}
+function importBackupFile(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    let parsed;
+    try{ parsed = JSON.parse(reader.result); }
+    catch(e){ flashToast('Geçersiz yedek dosyası'); return; }
+    if(!parsed || !Array.isArray(parsed.series)){ flashToast('Geçersiz yedek dosyası'); return; }
+    const ok = confirm(T('Bu yedek, bu cihazdaki mevcut verinin ÜZERİNE yazılacak. Emin misin?'));
+    if(!ok) return;
+    data = parsed;
+    if(!data.series) data.series = [];
+  data.series.forEach(se=>(se.seasons || []).forEach(x=>(x.episodes || []).forEach(e=>{ delete e.rating; })));
+    data.series.forEach(ser=>ser.seasons.forEach(s=>s.episodes.forEach(e=>{
+      if(!e.status) e.status = 'devam';
+      if(!e.images) e.images = [];
+      if(!e.characters) e.characters = [];
+    })));
+    currentSeriesId = null; currentSeasonId = null; currentEpisodeId = null;
+    dataLoaded = true;
+    render();
+    saveNow();
+    flashToast('Yedek yüklendi ve kaydedildi');
+  };
+  reader.onerror = ()=> flashToast('Dosya okunamadı');
+  reader.readAsText(file);
+}
+document.getElementById('backupExportBtn').addEventListener('click', exportBackup);
+document.getElementById('backupImportBtn').addEventListener('click', ()=>{
+  document.getElementById('backupFileInput').click();
+});
+document.getElementById('backupFileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(file) importBackupFile(file);
+  e.target.value = '';
+});
+
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveNow(); });
+window.addEventListener('pagehide', saveNow);
+
+window.addEventListener('beforeunload', saveNow);
+window.addEventListener('blur', saveNow);
+
+/* ================= THEME / FONT ================= */
+function applyTheme(){
+  document.body.setAttribute('data-theme', currentTheme);
+  renderThemeRow();
+}
+function setTheme(id){
+  currentTheme = id;
+  localStorage.setItem('luna-theme', id);
+  applyTheme();
+}
+function renderThemeRow(){
+  const row = document.getElementById('themeRow');
+  row.innerHTML = '';
+  THEMES.forEach(t=>{
+    const b = document.createElement('button');
+    b.className = 'theme-swatch ' + t.cls + (currentTheme===t.id ? ' active':'');
+    b.title = t.label;
+    b.onclick = ()=>setTheme(t.id);
+    row.appendChild(b);
+  });
+}
+function applyFont(){
+  document.documentElement.style.setProperty('--editor-font', FONT_MAP[currentFont] || FONT_MAP.sans);
+  document.documentElement.style.setProperty('--editor-size', (parseInt(localStorage.getItem('luna-fsize')) || 17) + 'px');
+}
+function setFont(id){
+  currentFont = id;
+  localStorage.setItem('luna-font', id);
+  applyFont();
+}
+
+/* ================= MOTION (QUIET MODE) ================= */
+function applyMotion(){
+  document.body.classList.toggle('no-motion', !!noMotion);
+  const sw = document.getElementById('motionSwitch');
+  if(sw) sw.classList.toggle('on', !!noMotion);
+}
+function setMotion(off){
+  noMotion = off;
+  localStorage.setItem('luna-motion', off ? '1':'0');
+  applyMotion();
+}
+document.getElementById('motionSwitch').onclick = ()=>setMotion(!noMotion);
+
+/* ================= BACKGROUND ANIMATION STYLE ================= */
+function applyBgAnim(){
+  document.body.setAttribute('data-bg-anim', currentBgAnim);
+  const sel = document.getElementById('bgAnimSelect');
+  if(sel) sel.value = currentBgAnim;
+}
+function setBgAnim(id){
+  currentBgAnim = id;
+  localStorage.setItem('luna-bg-anim', id);
+  applyBgAnim();
+}
+document.getElementById('bgAnimSelect').onchange = (e)=>setBgAnim(e.target.value);
+
+/* ================= PHONE MODE (SIDEBAR DRAWER) ================= */
+function openSidebar(){
+  document.querySelector('.sidebar').classList.add('open');
+  document.getElementById('sidebarBackdrop').classList.add('show');
+}
+function closeSidebar(){
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('show');
+}
+document.getElementById('menuToggle').onclick = ()=>{
+  const sb = document.querySelector('.sidebar');
+  sb.classList.contains('open') ? closeSidebar() : openSidebar();
+};
+document.getElementById('sidebarBackdrop').onclick = closeSidebar;
+
+/* ================= DATA HELPERS ================= */
+function getSeries(id){ return data.series.find(s=>s.id===id); }
+function getSeason(serId,sId){
+  const ser = getSeries(serId);
+  return ser ? ser.seasons.find(s=>s.id===sId) : null;
+}
+function getEpisode(serId,sId,eId){
+  const s = getSeason(serId,sId);
+  return s ? s.episodes.find(e=>e.id===eId) : null;
+}
+
+function addSeries(){
+  data.series.push({ id: uid(), title: 'Yeni Seri', open:true, seasons: [] });
+  renderTree(); saveNow();
+}
+function addSeason(serId){
+  const ser = getSeries(serId);
+  if(!ser) return;
+  ser.seasons.push({ id: uid(), title: 'Yeni Sezon', open:true, episodes: [] });
+  renderTree(); saveNow();
+}
+function addEpisode(serId,sId){
+  const s = getSeason(serId,sId);
+  if(!s) return;
+  const e = { id: uid(), title:'', script:'', status:'devam',
+    notes:{synopsis:'', worldbuilding:'', outline:'', misc:''}, characters:[], images:[] };
+  s.episodes.push(e);
+  currentSeriesId = serId; currentSeasonId = sId; currentEpisodeId = e.id;
+  s.open = true;
+  renderTree(); renderMain(); saveNow();
+}
+let dragEp = null;
+function moveEpisode(s, id, targetId, after){
+  const from = s.episodes.findIndex(e=>e.id===id);
+  if(from < 0) return;
+  const [e] = s.episodes.splice(from, 1);
+  let to = s.episodes.findIndex(x=>x.id===targetId);
+  if(to < 0) to = s.episodes.length; else if(after) to++;
+  s.episodes.splice(to, 0, e);
+  renderTree(); renderMain(); saveNow();
+}
+function stepEpisode(s, id, d){
+  const i = s.episodes.findIndex(e=>e.id===id), j = i + d;
+  if(i < 0 || j < 0 || j >= s.episodes.length) return;
+  [s.episodes[i], s.episodes[j]] = [s.episodes[j], s.episodes[i]];
+  renderTree(); renderMain(); saveNow();
+}
+/* Seri kapağı */
+let pendingCoverSeries = null;
+function pickSeriesCover(id){ pendingCoverSeries = id; document.getElementById('hiddenSeriesCoverInput').click(); }
+function applyCover(){
+  const c = document.getElementById('epCover');
+  if(!c) return;
+  const ser = getSeries(currentSeriesId), u = ser && ser.cover;
+  c.style.display = u ? 'block' : 'none';
+  if(c.parentElement) c.parentElement.classList.toggle('has-cover', !!u);
+  c.style.backgroundImage = u ? 'url("' + u + '")' : 'none';
+  c.title = 'Seri kapağı (değiştirmek için tıkla)';
+  c.style.cursor = 'pointer';
+  c.onclick = ()=>pickSeriesCover(currentSeriesId);
+}
+/* Numaralandırma: normal bölümler 1,2,3… buçuklar bir öncekinin .5'i (4.5). Aynı bölümden sonra birden fazla buçuk olursa .5, .6, .7… */
+function epLabels(season){
+  let n = 0, h = 0;
+  return season.episodes.map(e=>{
+    if(e.half){ h++; return n + '.' + (4 + h); }
+    n++; h = 0; return String(n);
+  });
+}
+function addHalfEpisode(serId, sId, afterId){
+  const s = getSeason(serId, sId);
+  if(!s) return;
+  if(!s.episodes.length){ flashToast('Önce bir bölüm ekle'); return; }
+  let i = afterId ? s.episodes.findIndex(x=>x.id===afterId) : s.episodes.length - 1;
+  if(i < 0) i = s.episodes.length - 1;
+  const e = { id: uid(), title:'', script:'', status:'devam', half:true,
+    notes:{synopsis:'', worldbuilding:'', outline:'', misc:''}, characters:[], images:[] };
+  s.episodes.splice(i + 1, 0, e);
+  currentSeriesId = serId; currentSeasonId = sId; currentEpisodeId = e.id;
+  currentTab = 'script';
+  const ser = getSeries(serId); if(ser) ser.open = true;
+  s.open = true;
+  renderTree(); renderMain(); saveNow();
+  if(window.innerWidth <= 820) closeSidebar();
+}
+function deleteSeries(serId, ev){
+  ev.stopPropagation();
+  if(!confirm(T('Bu seri, içindeki tüm sezon ve bölümlerle birlikte silinsin mi?'))) return;
+  data.series = data.series.filter(s=>s.id!==serId);
+  if(currentSeriesId===serId){ currentSeriesId=null; currentSeasonId=null; currentEpisodeId=null; }
+  renderTree(); renderMain(); saveNow();
+}
+function deleteSeason(serId, sId, ev){
+  ev.stopPropagation();
+  if(!confirm(T('Bu sezon ve içindeki tüm bölümler silinsin mi?'))) return;
+  const ser = getSeries(serId);
+  ser.seasons = ser.seasons.filter(s=>s.id!==sId);
+  if(currentSeasonId===sId){ currentSeasonId=null; currentEpisodeId=null; }
+  renderTree(); renderMain(); saveNow();
+}
+function deleteEpisode(serId, sId, eId, ev){
+  ev.stopPropagation();
+  if(!confirm(T('Bu bölüm silinsin mi?'))) return;
+  const s = getSeason(serId,sId);
+  s.episodes = s.episodes.filter(e=>e.id!==eId);
+  if(currentEpisodeId===eId) currentEpisodeId=null;
+  renderTree(); renderMain(); saveNow();
+}
+function selectEpisode(serId, sId, eId){
+  saveNow();
+  currentSeriesId = serId; currentSeasonId = sId; currentEpisodeId = eId;
+  currentTab = 'script';
+  try{ localStorage.setItem('luna-last', JSON.stringify({s:serId, se:sId, e:eId})); }catch(_){}
+  renderTree(); renderMain();
+  if(window.innerWidth <= 820) closeSidebar();
+}
+function toggleSeries(serId){ const ser=getSeries(serId); ser.open=!ser.open; renderTree(); }
+function toggleSeason(serId, sId){ const s=getSeason(serId,sId); s.open=!s.open; renderTree(); }
+
+function toggleEpisodeStatus(serId, sId, eId, ev){
+  if(ev) ev.stopPropagation();
+  const e = getEpisode(serId, sId, eId);
+  e.status = e.status === 'bitti' ? 'devam' : 'bitti';
+  renderTree();
+  if(currentEpisodeId===eId) renderMain();
+  saveNow();
+}
+
+/* ================= RENDER: TREE ================= */
+function renderTree(){
+  const wrap = document.getElementById('seriesList');
+  wrap.innerHTML = '';
+  let totalEpisodes = 0, totalSeasons = 0, totalDone = 0;
+  const q = ((document.getElementById('treeSearch')||{}).value || '').trim().toLowerCase();
+
+  data.series.forEach(ser=>{
+    const serBlock = document.createElement('div');
+    serBlock.className = 'series-block' + ((ser.open || q) ? ' open':'');
+    let serMatch = false;
+
+    const sHead = document.createElement('div');
+    sHead.className = 'series-head';
+    sHead.onclick = ()=>toggleSeries(ser.id);
+    sHead.innerHTML = `
+      <span class="series-chevron"></span>
+      <span class="series-cover${ser.cover ? ' has' : ''}"><button class="series-cover-btn" title="Seri kapağı ekle / değiştir"></button>${ser.cover ? '<button class="series-cover-x" title="Kapağı kaldır">×</button>' : ''}</span>
+      <span class="series-title" contenteditable="true" spellcheck="false"></span>
+      ${serTagBadge(ser)}<span class="series-count">${ser.seasons.length}</span>
+      <button class="series-del" title="Seriyi sil">✕</button>
+    `;
+    const serTitleSpan = sHead.querySelector('.series-title');
+    serTitleSpan.textContent = ser.title;
+    serTitleSpan.onclick = (e)=>e.stopPropagation();
+    serTitleSpan.onblur = ()=>{ ser.title = serTitleSpan.textContent.trim() || 'İsimsiz Seri'; renderMain(); saveNow(); };
+    serTitleSpan.onkeydown = (e)=>{ if(e.key==='Enter'){ e.preventDefault(); serTitleSpan.blur(); } };
+    sHead.querySelector('.series-del').onclick = (ev)=>deleteSeries(ser.id, ev);
+    const cbtn = sHead.querySelector('.series-cover-btn');
+    if(ser.cover) cbtn.style.backgroundImage = 'url("' + ser.cover + '")'; else cbtn.textContent = '+';
+    cbtn.onclick = (ev)=>{ ev.stopPropagation(); pickSeriesCover(ser.id); };
+    const cx = sHead.querySelector('.series-cover-x');
+    if(cx) cx.onclick = (ev)=>{ ev.stopPropagation(); ser.cover = ''; renderTree(); applyCover(); saveNow(); };
+    serBlock.appendChild(sHead);
+
+    const serBody = document.createElement('div');
+    serBody.className = 'series-body';
+
+    ser.seasons.forEach(s=>{
+      totalSeasons++;
+      totalEpisodes += s.episodes.length;
+      const seasonEl = document.createElement('div');
+      seasonEl.className = 'season' + ((s.open || q) ? ' open':'');
+
+      const doneCount = s.episodes.filter(e=>e.status==='bitti').length;
+      totalDone += doneCount;
+
+      const head = document.createElement('div');
+      head.className = 'season-head';
+      head.onclick = ()=>toggleSeason(ser.id, s.id);
+      head.innerHTML = `
+        <span class="season-chevron"></span>
+        <span class="season-title" contenteditable="true" spellcheck="false"></span>
+        ${seasonTagBadge(s)}<span class="season-count">${doneCount}/${s.episodes.length}</span>
+        <button class="season-del" title="Sezonu sil">✕</button>
+      `;
+      const titleSpan = head.querySelector('.season-title');
+      titleSpan.textContent = s.title;
+      titleSpan.onclick = (e)=>e.stopPropagation();
+      titleSpan.onblur = ()=>{ s.title = titleSpan.textContent.trim() || 'İsimsiz Sezon'; renderMain(); saveNow(); };
+      titleSpan.onkeydown = (e)=>{ if(e.key==='Enter'){ e.preventDefault(); titleSpan.blur(); } };
+      head.querySelector('.season-del').addEventListener('click', (ev)=>{
+        ev.stopPropagation();
+        deleteSeason(ser.id, s.id, ev);
+      });
+      seasonEl.appendChild(head);
+
+      const epList = document.createElement('div');
+      epList.className = 'episodes';
+      const labels = epLabels(s);
+      let seasonMatch = false;
+      s.episodes.forEach((e,idx)=>{
+        if(q){
+          const hay = (labels[idx] + ' ' + (e.title || '')).toLowerCase();
+          if(!(hay.includes(q) || (q.length >= 3 && stripHtml(e.script).toLowerCase().includes(q)))) return;
+          seasonMatch = true;
+        }
+        const epEl = document.createElement('div');
+        epEl.className = 'episode' + (e.half ? ' half':'') + (currentEpisodeId===e.id ? ' active':'');
+        epEl.onclick = ()=>selectEpisode(ser.id, s.id, e.id);
+        const sub = [e.date ? fmtDate(e.date) : '', e.tag ? `<b class="tg-${e.tag}">${tagLabel(e.tag)}</b>` : ''].filter(Boolean).join(' · ');
+        epEl.innerHTML = `
+          <button class="ep-status-dot ${e.status==='bitti'?'done':''}" title="${e.status==='bitti'?'Bitti':'Devam ediyor'}"></button>
+          <span class="episode-name"><span class="ep-t">${labels[idx]+'. '+escapeHtml(e.title || 'İsimsiz bölüm')}</span>${sub ? '<small class="ep-sub">'+sub+'</small>' : ''}</span>
+          ${e.half ? '' : '<button class="episode-half" title="Altına buçuk bölüm ekle (örn. 4.5)">½</button>'}
+          <button class="episode-del" title="Sil">✕</button>
+        `;
+        epEl.querySelector('.ep-status-dot').onclick = (ev)=>toggleEpisodeStatus(ser.id,s.id,e.id,ev);
+        epEl.querySelector('.episode-del').onclick = (ev)=>deleteEpisode(ser.id,s.id,e.id,ev);
+        epEl.draggable = true;
+        epEl.ondragstart = (ev)=>{ dragEp = {sId:s.id, id:e.id}; ev.dataTransfer.effectAllowed = 'move'; try{ ev.dataTransfer.setData('text/plain', e.id); }catch(_){} epEl.classList.add('dragging'); };
+        epEl.ondragend = ()=>{ dragEp = null; document.querySelectorAll('.drop-before,.drop-after,.dragging').forEach(x=>x.classList.remove('drop-before','drop-after','dragging')); };
+        epEl.ondragover = (ev)=>{
+          if(!dragEp || dragEp.sId !== s.id || dragEp.id === e.id) return;
+          ev.preventDefault();
+          const r = epEl.getBoundingClientRect(), after = ev.clientY > r.top + r.height/2;
+          epEl.classList.toggle('drop-after', after); epEl.classList.toggle('drop-before', !after);
+        };
+        epEl.ondragleave = ()=>epEl.classList.remove('drop-before','drop-after');
+        epEl.ondrop = (ev)=>{
+          if(!dragEp || dragEp.sId !== s.id) return;
+          ev.preventDefault();
+          const r = epEl.getBoundingClientRect(), after = ev.clientY > r.top + r.height/2, id = dragEp.id;
+          dragEp = null; moveEpisode(s, id, e.id, after);
+        };
+        const hb = epEl.querySelector('.episode-half');
+        if(hb) hb.onclick = (ev)=>{ ev.stopPropagation(); addHalfEpisode(ser.id, s.id, e.id); };
+        epList.appendChild(epEl);
+      });
+      seasonEl.appendChild(epList);
+
+      const addEpBtn = document.createElement('button');
+      addEpBtn.className = 'new-episode-btn';
+      addEpBtn.textContent = '+ Yeni bölüm';
+      addEpBtn.style.display = (s.open && !q) ? 'block' : 'none';
+      addEpBtn.onclick = ()=>addEpisode(ser.id, s.id);
+      seasonEl.appendChild(addEpBtn);
+
+      const addHalfBtn = document.createElement('button');
+      addHalfBtn.className = 'new-episode-btn half';
+      addHalfBtn.textContent = '+ Buçuk bölüm (x.5)';
+      addHalfBtn.style.display = (s.open && !q) ? 'block' : 'none';
+      addHalfBtn.onclick = ()=>addHalfEpisode(ser.id, s.id, null);
+      seasonEl.appendChild(addHalfBtn);
+
+      if(!q || seasonMatch){ serBody.appendChild(seasonEl); if(q) serMatch = true; }
+    });
+
+    const addSeasonBtn = document.createElement('button');
+    addSeasonBtn.className = 'new-season-btn';
+    addSeasonBtn.textContent = '+ Yeni sezon';
+    addSeasonBtn.onclick = ()=>addSeason(ser.id);
+    serBody.appendChild(addSeasonBtn);
+
+    serBlock.appendChild(serBody);
+    if(!q || serMatch) wrap.appendChild(serBlock);
+  });
+
+  document.getElementById('totalStats').innerHTML =
+    `<span class="save-dot" id="saveDot"></span>${data.series.length} seri · ${totalSeasons} sezon · ${totalDone}/${totalEpisodes} bölüm bitti`;
+}
+
+/* ================= RENDER: MAIN ================= */
+function renderMain(){
+  clearInterval(heroTimer);
+  const main = document.getElementById('mainContent');
+  main.classList.remove('scroll');
+  const ep = currentEpisodeId ? getEpisode(currentSeriesId, currentSeasonId, currentEpisodeId) : null;
+
+  if(!ep){ renderHome(main); return; }
+
+  const ser = getSeries(currentSeriesId);
+  const season = getSeason(currentSeriesId, currentSeasonId);
+  const wc = countWords(stripHtml(ep.script));
+  const epLabel = epLabels(season)[season.episodes.indexOf(ep)];
+
+  main.innerHTML = `
+    <div class="topbar">
+      <div class="ep-cover" id="epCover"></div>
+      <div class="tb-main" style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:0;">
+        <span class="crumb">${escapeHtml(ser.title)} / ${escapeHtml(season.title)} / Bölüm ${epLabel}</span>
+        <input class="ep-title-input" id="titleInput" placeholder="Bölüm başlığı..." value="${escapeAttr(ep.title)}">
+      </div>
+      <span class="ep-meta">${wc} kelime</span>
+      <button class="fmt-btn" id="infoBtn" title="Çıkış tarihi, etiketler, durum">Detay</button>
+      <button class="fmt-btn" id="zenBtn" title="Odak modu (Esc ile çık)">Odak</button>
+      <span class="save-pill" id="savePill">● kaydedildi</span>
+    </div>
+    <div class="info-panel" id="infoPanel">
+      <div class="meta-row" id="metaRow"></div>
+      <div class="info-line"><span>Durum</span><div class="status-toggle">
+        <button class="status-opt devam ${ep.status!=='bitti'?'active devam':''}" id="btnDevam">Devam ediyor</button>
+        <button class="status-opt bitti ${ep.status==='bitti'?'active bitti':''}" id="btnBitti">Bitti</button>
+      </div><span>Sıra</span><button class="fmt-btn" id="moveUp" title="Bölümü yukarı taşı">↑</button><button class="fmt-btn" id="moveDown" title="Bölümü aşağı taşı">↓</button></div>
+      <div class="info-line"><button class="fmt-btn" id="readBtn">📖 Oku</button><button class="fmt-btn" id="serInfoBtn">Seri bilgisi</button></div>
+    </div>
+    <div class="tabs">
+      <div class="tab ${currentTab==='script'?'active':''}" data-tab="script">Senaryo</div>
+      <div class="tab ${currentTab==='notes'?'active':''}" data-tab="notes">Notlar</div>
+      <div class="tab ${currentTab==='chars'?'active':''}" data-tab="chars">Karakterler</div>
+      <div class="tab ${currentTab==='images'?'active':''}" data-tab="images">Görseller</div>
+    </div>
+    <div class="panes">
+      <div class="pane ${currentTab==='script'?'active':''}" id="pane-script">
+        <div class="editor-scroll">
+          <div class="editor-inner">
+            <div class="format-bar">
+              <button class="fmt-btn" data-ins="\\n\\nSAHNE ${'\u2014'} " data-k="script">+ Sahne</button>
+              <button class="fmt-btn" data-ins="\\n\\nKARAKTER ADI:\\n" data-k="script manga">+ Diyalog</button>
+              <button class="fmt-btn" data-ins="\\n(parantez içi yönlendirme)\\n" data-k="script">+ Yönlendirme</button>
+              <button class="fmt-btn" id="toolsBtn" title="Daha fazla araç">⋯ Araçlar</button>
+              <button class="fmt-btn" data-act="bold" title="Kalın"><b>B</b></button>
+              <button class="fmt-btn" data-act="italic" title="İtalik (iç ses, vurgu)"><i>I</i></button>
+              <button class="fmt-btn" data-act="sep" data-k="novel" title="Roman sahne ayracı">* * *</button>
+              <button class="fmt-btn" data-act="page" data-k="manga" title="Manga: yeni sayfa">+ Sayfa</button>
+              <button class="fmt-btn" data-act="panel" data-k="manga" title="Manga: yeni panel">+ Panel</button>
+              <button class="fmt-btn tool-item" data-act="sfx" data-k="manga" title="Ses efekti">+ SFX</button>
+              <button class="fmt-btn tool-item" data-act="narr" data-k="manga" title="Anlatı kutusu">+ Anlatı</button>
+              <button class="fmt-btn tool-item" data-act="todo">☐ Kutucuk</button>
+              <button class="fmt-btn tool-item" data-act="anote" data-k="novel">✎ Yazar notu</button>
+              <button class="fmt-btn tool-item" data-act="ruby" data-k="novel" title="Ruby / Furigana">ふ</button>
+              <button class="fmt-btn tool-item" data-act="find">⇄ Bul / değiştir</button>
+              <button class="fmt-btn tool-item" id="fixAllBtn">✓ Tümünü düzelt</button>
+              <select class="font-select tool-item" id="charPick"><option value="">Karakter ekle…</option>${ep.characters.filter(c=>c.name).map(c=>`<option>${escapeHtml(c.name)}</option>`).join('')}</select>
+              <button class="fmt-btn tool-item" id="exportBtn">↓ Dışa aktar (.txt)</button>
+              <button class="fmt-btn tool-item" id="fsDown" title="Yazıyı küçült">A−</button>
+              <button class="fmt-btn tool-item" id="fsUp" title="Yazıyı büyüt">A+</button>
+              <select class="font-select tool-item" id="fontSelect">
+                <option value="sans">Yazı: Sade (Plus Jakarta Sans)</option>
+                <option value="serif">Yazı: Kitap (Literata)</option>
+                <option value="display">Yazı: Zarif (Bricolage Grotesque)</option>
+                <option value="classic">Yazı: Klasik (Playfair)</option>
+                <option value="script">Yazı: Senaryo (Courier)</option>
+                <option value="mono">Yazı: Daktilo (JetBrains Mono)</option>
+                <option value="hand">Yazı: El yazısı (Caveat)</option>
+              </select>
+              <label class="spell-toggle tool-item"><input type="checkbox" id="autoToggle" ${autoOn ? 'checked':''}> Otomatik düzeltme</label>
+              <label class="spell-toggle tool-item">
+                <input type="checkbox" id="spellToggle" ${spellcheckOn ? 'checked':''}>
+                Yazım denetimi
+              </label>
+            </div>
+            <div class="color-bar" id="colorBar">
+              <span class="color-bar-label">Renk:</span>
+              <button class="color-swatch" data-color="#e0645c" style="background:#e0645c" title="Kırmızı"></button>
+              <button class="color-swatch" data-color="#e8965a" style="background:#e8965a" title="Turuncu"></button>
+              <button class="color-swatch" data-color="#e8c95a" style="background:#e8c95a" title="Sarı"></button>
+              <button class="color-swatch" data-color="#7ec98a" style="background:#7ec98a" title="Yeşil"></button>
+              <button class="color-swatch" data-color="#5ecec2" style="background:#5ecec2" title="Turkuaz"></button>
+              <button class="color-swatch" data-color="#5ea0e0" style="background:#5ea0e0" title="Mavi"></button>
+              <button class="color-swatch" data-color="#9a7ee0" style="background:#9a7ee0" title="Mor"></button>
+              <button class="color-swatch" data-color="#e07ec2" style="background:#e07ec2" title="Pembe"></button>
+              <input type="color" id="customColor" class="color-custom" title="Özel renk" value="#e0645c">
+              <button class="fmt-btn" id="clearColorBtn">Rengi temizle</button>
+            </div>
+            <div id="editor" class="editor-ce" contenteditable="true" placeholder="Bir zamanlar..." spellcheck="${spellcheckOn}" lang="${(getSeries(currentSeriesId) || {}).wlang || LANG}"></div>
+          </div>
+        </div>
+        <div class="editor-footer">
+          <span class="wc" id="wordCountFooter" ></span>
+          <button class="hint-btn" id="hintBtn" title="İpuçları">?</button>
+        </div>
+      </div>
+
+      <div class="pane ${currentTab==='notes'?'active':''}" id="pane-notes">
+        <div class="notes-pane">
+          <div class="notes-grid">
+            <div class="note-card">
+              <h3>Konu özeti</h3>
+              <textarea id="note-synopsis" spellcheck="${spellcheckOn}" lang="${(getSeries(currentSeriesId) || {}).wlang || LANG}" placeholder="Bu bölümde ne oluyor?">${escapeHtml(ep.notes.synopsis)}</textarea>
+            </div>
+            <div class="note-card">
+              <h3>Dünya kurgusu</h3>
+              <textarea id="note-worldbuilding" spellcheck="${spellcheckOn}" lang="${(getSeries(currentSeriesId) || {}).wlang || LANG}" placeholder="Mekanlar, kurallar, arka plan...">${escapeHtml(ep.notes.worldbuilding)}</textarea>
+            </div>
+            <div class="note-card">
+              <h3>Sahne akışı</h3>
+              <textarea id="note-outline" spellcheck="${spellcheckOn}" lang="${(getSeries(currentSeriesId) || {}).wlang || LANG}" placeholder="1. Sahne...&#10;2. Sahne...">${escapeHtml(ep.notes.outline)}</textarea>
+            </div>
+            <div class="note-card">
+              <h3>Diğer</h3>
+              <textarea id="note-misc" spellcheck="${spellcheckOn}" lang="${(getSeries(currentSeriesId) || {}).wlang || LANG}" placeholder="Aklına takılan her şey...">${escapeHtml(ep.notes.misc)}</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane ${currentTab==='chars'?'active':''}" id="pane-chars">
+        <div class="chars-pane">
+          <div class="chars-inner">
+            <button class="char-add" id="addCharBtn">+ Karakter ekle</button>
+            <div id="charList"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane ${currentTab==='images'?'active':''}" id="pane-images">
+        <div class="images-pane">
+          <div class="images-inner">
+            <label class="img-add-label" for="hiddenImgInput">+ Görsel yükle</label>
+            <div class="img-hint">Referans görselleri, mekan/karakter çizimleri veya kapak görseli ekle. Görüntüler bu bölüme kaydedilir.</div>
+            <div class="img-grid" id="imgGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const titleInput = document.getElementById('titleInput');
+  titleInput.oninput = ()=>{ ep.title = titleInput.value; renderTree(); scheduleSave(); };
+  titleInput.onblur = saveNow;
+
+  document.getElementById('btnDevam').onclick = ()=>{ ep.status='devam'; renderMain(); renderTree(); saveNow(); };
+  document.getElementById('btnBitti').onclick = ()=>{ ep.status='bitti'; renderMain(); renderTree(); saveNow(); };
+
+  document.querySelectorAll('.tab').forEach(t=>{
+    t.onclick = ()=>{ saveNow(); currentTab = t.dataset.tab; renderMain(); };
+  });
+
+  const editor = document.getElementById('editor');
+  // Legacy kayıtlar düz metindir (etiket içermez) — bu durumda güvenle innerHTML olarak basılabilir,
+  // yeni kayıtlar zaten renkli span'ler içeren HTML olarak saklanıyor.
+  editor.innerHTML = ep.script || '';
+  let wcTimer = null;
+  const updateWordCount = ()=>{ clearTimeout(wcTimer); wcTimer = setTimeout(doWordCount, 250); };
+  const doWordCount = ()=>{
+    const words = countWords(editor.textContent || '');
+    const t = editor.innerText || '';
+    const pg = (t.match(/^\s*SAYFA\s+\d+/gmi) || []).length, pn = (t.match(/^\s*PANEL\s+\d+/gmi) || []).length;
+    document.getElementById('wordCountFooter').textContent = `${words} kelime · ${Math.max(1, Math.round(words/200))} dk okuma` + (pg || pn ? ` · ${pg} sayfa · ${pn} panel` : '');
+  };
+  editor.oninput = (ev)=>{
+    if(autoOn && !ev.isComposing) tryAutoCorrect();
+    ep.script = editor.innerHTML;
+    updateWordCount();
+    scheduleSave();
+  };
+  editor.onblur = saveNow;
+
+  editor.addEventListener('paste', function(e){
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+    if(!document.execCommand('insertText', false, text)){
+      // yedek yol: seçili aralığın yerine düz metni el ile yerleştir
+      const sel = window.getSelection();
+      if(sel && sel.rangeCount){
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(document.createTextNode(text));
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    }
+    ep.script = editor.innerHTML;
+    updateWordCount();
+    scheduleSave();
+  });
+
+  const fontSelect = document.getElementById('fontSelect');
+  fontSelect.value = currentFont;
+  fontSelect.onchange = (e)=>setFont(e.target.value);
+
+  document.getElementById('spellToggle').onchange = (e)=>{
+    spellcheckOn = e.target.checked;
+    localStorage.setItem('luna-spellcheck', spellcheckOn ? '1':'0');
+    renderMain();
+  };
+
+  function insertAtCursor(text){
+    editor.focus();
+    const html = escapeHtml(text).replace(/\n/g, '<br>');
+    if(!document.execCommand('insertHTML', false, html)){
+      editor.innerHTML += html; // eski tarayıcılar için yedek yol
+    }
+    ep.script = editor.innerHTML;
+    updateWordCount();
+    scheduleSave();
+  }
+
+  document.querySelectorAll('.fmt-btn[data-ins]').forEach(b=>{
+    b.onclick = ()=>{
+      const insert = b.dataset.ins.replace(/\\n/g,'\n');
+      insertAtCursor(insert);
+    };
+  });
+
+  /* Renk araç çubuğu — sadece seçili metne uygulanır */
+  document.querySelectorAll('.color-swatch').forEach(sw=>{
+    sw.onclick = ()=>{
+      editor.focus();
+      document.execCommand('styleWithCSS', false, true);
+      document.execCommand('foreColor', false, sw.dataset.color);
+      ep.script = editor.innerHTML;
+      scheduleSave();
+    };
+  });
+  document.getElementById('customColor').oninput = (e)=>{
+    editor.focus();
+    document.execCommand('styleWithCSS', false, true);
+    document.execCommand('foreColor', false, e.target.value);
+    ep.script = editor.innerHTML;
+    scheduleSave();
+  };
+  document.getElementById('clearColorBtn').onclick = ()=>{
+    editor.focus();
+    document.execCommand('styleWithCSS', false, true);
+    document.execCommand('foreColor', false, 'inherit');
+    ep.script = editor.innerHTML;
+    scheduleSave();
+  };
+
+  updateWordCount();
+  document.getElementById('exportBtn').onclick = ()=>exportEpisode(ep, editor);
+  document.getElementById('zenBtn').onclick = ()=>document.body.classList.toggle('zen');
+  document.getElementById('hintBtn').onclick = showHint;
+  document.getElementById('moveUp').onclick = ()=>stepEpisode(season, ep.id, -1);
+  document.getElementById('moveDown').onclick = ()=>stepEpisode(season, ep.id, 1);
+  viewAnim('ep:' + ep.id); renderMeta(ep); applyCover(ep);
+  const ip = document.getElementById('infoPanel');
+  if(localStorage.getItem('luna-info') === '1') ip.classList.add('open');
+  document.getElementById('infoBtn').onclick = ()=>{ ip.classList.toggle('open'); localStorage.setItem('luna-info', ip.classList.contains('open') ? '1' : '0'); };
+  document.getElementById('serInfoBtn').onclick = ()=>openSeriesInfo(ser.id);
+  document.getElementById('readBtn').onclick = ()=>openReader(ser.id, ep.id);
+  const einner = document.querySelector('.editor-inner');
+  if(einner){
+    einner.classList.add('kind-' + (ser.kind || 'script'));
+    if(localStorage.getItem('luna-tools') === '1') einner.classList.add('tools-open');
+    document.getElementById('toolsBtn').onclick = ()=>{ einner.classList.toggle('tools-open'); localStorage.setItem('luna-tools', einner.classList.contains('tools-open') ? '1' : '0'); };
+  }
+  const edText = ()=>editor.innerText || '';
+  const acts = {
+    sep: ()=>insertAtCursor('\n\n* * *\n\n'),
+    page: ()=>insertAtCursor('\n\nSAYFA ' + ((edText().match(/^\s*SAYFA\s+\d+/gmi) || []).length + 1) + '\n'),
+    panel: ()=>{ const parts = edText().split(/^\s*SAYFA\s+\d+/gmi); insertAtCursor('\nPANEL ' + (((parts[parts.length-1]).match(/^\s*PANEL\s+\d+/gmi) || []).length + 1) + ': '); },
+    sfx: ()=>insertAtCursor('\nSFX: '),
+    narr: ()=>insertAtCursor('\nANLATI KUTUSU: '),
+    anote: ()=>insertAtCursor('\n\n[A/N] '),
+    todo: ()=>{ editor.focus(); document.execCommand('insertHTML', false, '<div class="todo"><input type="checkbox" class="todo-cb">&nbsp;</div>'); ep.script = editor.innerHTML; scheduleSave(); },
+    ruby: ()=>{
+      const base = String(getSelection()); if(!base){ flashToast(T('Önce metni seç')); return; }
+      const rt = prompt(T('Furigana okunuşu:')); if(!rt) return;
+      document.execCommand('insertHTML', false, '<ruby>' + escapeHtml(base) + '<rt>' + escapeHtml(rt) + '</rt></ruby>');
+      ep.script = editor.innerHTML; scheduleSave();
+    },
+    find: ()=>{
+      const f = prompt(T('Aranacak metin:')); if(!f) return;
+      const r = prompt(T('Yeni metin:'), ''); if(r === null) return;
+      const all = confirm(T('Tüm seride değiştirilsin mi? (İptal = sadece bu bölüm)'));
+      let n = 0;
+      const doRep = (h)=>{
+        const d = document.createElement('div'); d.innerHTML = h || '';
+        const w = document.createTreeWalker(d, NodeFilter.SHOW_TEXT); let x;
+        while((x = w.nextNode())){ const c = x.data.split(f).length - 1; if(c){ n += c; x.data = x.data.split(f).join(r); } }
+        return d.innerHTML;
+      };
+      if(all) ser.seasons.forEach(se=>se.episodes.forEach(e=>{ e.script = doRep(e.script); })); else ep.script = doRep(ep.script);
+      editor.innerHTML = ep.script; updateWordCount(); scheduleSave(); flashToast(T('Değiştirilen') + ': ' + n);
+    }
+  };
+  editor.addEventListener('compositionend', ()=>setTimeout(()=>{ if(autoOn) tryAutoCorrect(); }, 0));
+  document.getElementById('fixAllBtn').onclick = ()=>{ const n = fixAll(editor, ser); ep.script = editor.innerHTML; updateWordCount(); scheduleSave(); flashToast(T('Düzeltilen') + ': ' + n); };
+  { const cl = creditLines(ser);
+    if(cl.length){ const cr = document.createElement('div'); cr.className = 'ed-credits'; cr.contentEditable = 'false'; cr.innerHTML = '<div class="end">' + escapeHtml(T('Bölüm sonu')) + '</div>' + cl.map(l=>'<div>' + escapeHtml(l) + '</div>').join(''); editor.insertAdjacentElement('afterend', cr); cr.onclick = ()=>openSeriesInfo(ser.id); } }
+  editor.lang = writingLang(ser, editor.textContent);
+  document.getElementById('autoToggle').onchange = (e)=>{ autoOn = e.target.checked; localStorage.setItem('luna-autocorrect', autoOn ? '1' : '0'); };
+  editor.addEventListener('change', (e)=>{
+    if(e.target.classList && e.target.classList.contains('todo-cb')){
+      e.target.toggleAttribute('checked', e.target.checked);
+      e.target.parentElement.classList.toggle('done', e.target.checked);
+      ep.script = editor.innerHTML; scheduleSave();
+    }
+  });
+  const firstNote = document.querySelector('.note-card');
+  if(firstNote){
+    const nb = document.createElement('button'); nb.className = 'fmt-btn'; nb.textContent = '☐ Kutucuk'; nb.style.gridColumn = '1 / -1'; nb.style.margin = '0 0 10px';
+    firstNote.parentElement.insertBefore(nb, firstNote);
+    let lastTa = null;
+    document.querySelectorAll('.note-card textarea').forEach(ta=>{
+      ta.addEventListener('focus', ()=>{ lastTa = ta; });
+      ta.addEventListener('keydown', (ev)=>{
+        if(ev.key !== 'Enter') return;
+        const v = ta.value, p = ta.selectionStart, ls = v.lastIndexOf('\n', p - 1) + 1;
+        if(/^[☐☑] /.test(v.slice(ls, p))){ ev.preventDefault(); document.execCommand('insertText', false, '\n☐ '); }
+      });
+      ta.addEventListener('click', ()=>{
+        const v = ta.value, p = ta.selectionStart, ls = v.lastIndexOf('\n', p - 1) + 1;
+        if(p - ls <= 2 && /[☐☑]/.test(v[ls])){ ta.value = v.slice(0, ls) + (v[ls] === '☐' ? '☑' : '☐') + v.slice(ls + 1); ta.setSelectionRange(p, p); ta.dispatchEvent(new Event('input')); }
+      });
+    });
+    nb.onmousedown = (e)=>e.preventDefault();
+    nb.onclick = ()=>{ const ta = lastTa || document.querySelector('.note-card textarea'); ta.focus(); const v = ta.value; document.execCommand('insertText', false, (v && !v.endsWith('\n') && ta.selectionStart === v.length ? '\n' : '') + '☐ '); };
+  }
+  document.querySelectorAll('[data-act]').forEach(b=>{
+    b.onmousedown = (e)=>e.preventDefault();
+    b.onclick = ()=>{
+      if(b.dataset.act === 'bold' || b.dataset.act === 'italic'){
+        editor.focus(); document.execCommand(b.dataset.act); ep.script = editor.innerHTML; scheduleSave();
+      } else acts[b.dataset.act]();
+    };
+  });
+  const cp = document.getElementById('charPick');
+  if(cp) cp.onchange = ()=>{ if(cp.value) insertAtCursor('\n\n' + cp.value.toLocaleUpperCase('tr') + ':\n'); cp.value = ''; };
+  const stepFs = (d)=>{
+    const cur = parseInt(localStorage.getItem('luna-fsize')) || 17;
+    const next = Math.min(26, Math.max(13, cur + d));
+    localStorage.setItem('luna-fsize', next);
+    document.documentElement.style.setProperty('--editor-size', next + 'px');
+  };
+  document.getElementById('fsDown').onclick = ()=>stepFs(-1);
+  document.getElementById('fsUp').onclick = ()=>stepFs(1);
+
+  ['synopsis','worldbuilding','outline','misc'].forEach(key=>{
+    const ta = document.getElementById('note-'+key);
+    ta.oninput = ()=>{ ep.notes[key] = ta.value; scheduleSave(); };
+    ta.onblur = saveNow;
+  });
+
+  document.getElementById('addCharBtn').onclick = ()=>{
+    ep.characters.push({id:uid(), name:'', desc:'', photo:''});
+    renderMain();
+    saveNow();
+  };
+
+  renderChars(ep);
+  renderImages(ep);
+}
+
+function renderChars(ep){
+  const list = document.getElementById('charList');
+  if(!list) return;
+  list.innerHTML = '';
+  ep.characters.forEach(c=>{
+    const card = document.createElement('div');
+    card.className = 'char-card';
+    const initial = (c.name||'?').trim().charAt(0).toUpperCase() || '?';
+    card.innerHTML = `
+      <div class="char-avatar" style="${c.photo ? `background-image:url('${c.photo}')`:''}">${c.photo ? '' : initial}</div>
+      <div class="char-body">
+        <input class="char-name" spellcheck="${spellcheckOn}" lang="${(getSeries(currentSeriesId) || {}).wlang || LANG}" placeholder="Karakter adı" value="${escapeAttr(c.name)}">
+        <textarea class="char-desc" rows="2" spellcheck="${spellcheckOn}" lang="${(getSeries(currentSeriesId) || {}).wlang || LANG}" placeholder="Kısa tanım, motivasyon, ses tonu...">${escapeHtml(c.desc)}</textarea>
+        <span class="char-photo-btn">${c.photo ? 'Fotoğrafı değiştir' : '+ Fotoğraf ekle'}</span>
+      </div>
+      <button class="char-del">✕</button>
+    `;
+    const nameInput = card.querySelector('.char-name');
+    nameInput.oninput = ()=>{
+      c.name = nameInput.value;
+      if(!c.photo) card.querySelector('.char-avatar').textContent = (c.name||'?').trim().charAt(0).toUpperCase() || '?';
+      scheduleSave();
+    };
+    nameInput.onblur = saveNow;
+    const descInput = card.querySelector('.char-desc');
+    descInput.oninput = ()=>{ c.desc = descInput.value; scheduleSave(); };
+    descInput.onblur = saveNow;
+    card.querySelector('.char-photo-btn').onclick = ()=>{
+      pendingCharPhotoId = c.id;
+      document.getElementById('hiddenCharImgInput').click();
+    };
+    card.querySelector('.char-del').onclick = ()=>{
+      ep.characters = ep.characters.filter(x=>x.id!==c.id);
+      renderChars(ep);
+      saveNow();
+    };
+    list.appendChild(card);
+  });
+}
+
+function renderImages(ep){
+  const grid = document.getElementById('imgGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  ep.images.forEach(img=>{
+    const card = document.createElement('div');
+    card.className = 'img-card';
+    card.innerHTML = `
+      <img src="${img.dataUrl}" alt="">
+      <div class="img-card-body">
+        <button class="img-del">✕</button>
+        <input class="img-caption" placeholder="Açıklama ekle..." value="${escapeAttr(img.caption)}">
+      </div>
+    `;
+    card.querySelector('.img-del').onclick = ()=>{
+      ep.images = ep.images.filter(x=>x.id!==img.id);
+      if(ep.coverId === img.id) ep.coverId = null;
+      renderImages(ep); applyCover(ep); renderTree();
+      saveNow();
+    };
+    const cap = card.querySelector('.img-caption');
+    cap.oninput = ()=>{ img.caption = cap.value; scheduleSave(); };
+    cap.onblur = saveNow;
+    grid.appendChild(card);
+  });
+}
+
+/* image upload handlers (episode gallery + character avatar) */
+document.getElementById('hiddenImgInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const ep = getEpisode(currentSeriesId, currentSeasonId, currentEpisodeId);
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    ep.images.push({id:uid(), dataUrl:reader.result, caption:''});
+    renderImages(ep);
+    saveNow();
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
+document.getElementById('hiddenCharImgInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file || !pendingCharPhotoId) return;
+  const ep = getEpisode(currentSeriesId, currentSeasonId, currentEpisodeId);
+  const c = ep.characters.find(x=>x.id===pendingCharPhotoId);
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    if(c){ c.photo = reader.result; renderChars(ep); saveNow(); }
+    pendingCharPhotoId = null;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
+/* ================= UTIL ================= */
+function dailyKey(){ return new Date().toLocaleDateString('sv-SE'); }
+const TAGS = [['final','Final'],['sezonfinal','Sezon finali'],['ara','Ara verildi'],['birakildi','Bırakıldı']];
+function tagLabel(k){ const t = TAGS.find(x=>x[0]===k); return t ? t[1] : ''; }
+function tagBadge(k){ return k ? `<span class="ep-tag tg-${k}">${tagLabel(k)}</span>` : ''; }
+function fmtDate(d){ if(!d) return ''; const a = d.split('-'); return a[2] + '.' + a[1] + '.' + a[0]; }
+function serTagBadge(ser){ const l = ser.seasons.flatMap(x=>x.episodes).slice(-1)[0]; return l && ['final','ara','birakildi'].includes(l.tag) ? tagBadge(l.tag) : ''; }
+function seasonTagBadge(s){ const l = s.episodes[s.episodes.length - 1]; return l && ['final','sezonfinal'].includes(l.tag) ? tagBadge(l.tag) : ''; }
+function renderMeta(ep){
+  const row = document.getElementById('metaRow');
+  if(!row) return;
+  row.innerHTML = `<label class="date-wrap" title="Çıkış tarihi"><span>Çıkış</span><input type="date" class="date-input" value="${ep.date || ''}"></label>`
+    + TAGS.map(t=>`<button class="tag-chip tg-${t[0]}${ep.tag === t[0] ? ' on' : ''}" data-k="${t[0]}">${t[1]}</button>`).join('');
+  row.querySelector('.date-input').onchange = (e)=>{ ep.date = e.target.value; saveNow(); renderTree(); };
+  row.querySelectorAll('.tag-chip').forEach(b=>b.onclick = ()=>{ ep.tag = ep.tag === b.dataset.k ? '' : b.dataset.k; saveNow(); renderMeta(ep); renderTree(); });
+}
+function showHint(){
+  const t = document.getElementById('toast');
+  t.textContent = 'Metni seç, üstteki renklerden birine tıkla — sadece seçtiğin kelime/cümle renklenir. Kırmızı çizgili kelimeye sağ tıklayınca yazım önerisi çıkar.';
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 7000);
+}
+function exportSeries(ser){
+  const txt = (h)=>stripHtml((h || '').replace(/<br\s*\/?>/gi, '\n').replace(/<\/(div|p)>/gi, '\n'));
+  let t = ser.title + '\n\n';
+  ser.seasons.forEach(se=>{
+    const L = epLabels(se);
+    t += '=== ' + se.title + ' ===\n\n';
+    se.episodes.forEach((e,i)=>{ t += 'Bölüm ' + L[i] + ': ' + (e.title || 'İsimsiz') + '\n\n' + txt(e.script) + '\n\n' + (creditLines(ser).length ? creditLines(ser).join('\n') + '\n\n' : ''); });
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([t], {type:'text/plain;charset=utf-8'}));
+  a.download = (ser.title || 'seri').replace(/[^\w\-ğüşıöçĞÜŞİÖÇ ]/g, '').trim() + '.txt';
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+}
+function dashboardHtml(){
+  let last = null; try{ last = JSON.parse(localStorage.getItem('luna-last') || 'null'); }catch(_){}
+  const le = last && getEpisode(last.s, last.se, last.e);
+  return `<div class="dash">`
+    + (le ? `<button class="fmt-btn" id="dashResume" data-s="${last.s}" data-se="${last.se}" data-e="${last.e}">Kaldığın yerden devam et: ${escapeHtml(le.title || 'İsimsiz bölüm')}</button>` : '')
+    + data.series.map(se=>{
+      const n = se.seasons.reduce((a,x)=>a + x.episodes.length, 0);
+      return `<div class="dash-series"><span class="dash-cover"${se.cover ? ' style="background-image:url(&quot;' + se.cover + '&quot;)"' : ''}></span><div class="dash-info"><b>${escapeHtml(se.title)}</b><small>${se.author ? escapeHtml(se.author) : ''}</small><small>${n} bölüm</small></div><div class="dash-actions"><button class="fmt-btn dash-export" data-ser="${se.id}" title="Seriyi indir (.txt)">↓ TXT</button><button class="fmt-btn dash-epub" data-ser="${se.id}">↓ EPUB</button><button class="fmt-btn dash-info" data-ser="${se.id}" title="Seri bilgisi">ⓘ</button></div></div>`;
+    }).join('') + `</div>`;
+}
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape') document.body.classList.remove('zen');
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's'){ e.preventDefault(); saveNow(); flashToast('Kaydedildi'); }
+});
+function countWords(text){
+  const t = text.trim();
+  return t ? t.split(/\s+/).length : 0;
+}
+function escapeHtml(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function escapeAttr(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+}
+function stripHtml(html){
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html || '';
+  return tmp.textContent || '';
+}
+function exportEpisode(ep, editorEl){
+  const plainText = editorEl ? editorEl.innerText : stripHtml(ep.script);
+  const blob = new Blob([`${ep.title || 'İsimsiz Bölüm'}\n\n${plainText}`], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${(ep.title||'bolum').replace(/[^\w\-ğüşıöçĞÜŞİÖÇ ]/g,'').trim() || 'bolum'}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function render(){ renderTree(); renderMain(); }
+
+function updateClock(){
+  const el = document.getElementById('clock');
+  const now = new Date();
+  el.textContent = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+}
+setInterval(updateClock, 1000*30);
+updateClock();
+
+/* ================= AMBIENCE + SPLASH ================= */
+function spawnStars(){
+  const wrap = document.getElementById('bgStars');
+  const count = 60;
+  for(let i=0;i<count;i++){
+    const s = document.createElement('div');
+    s.className = 'bg-star';
+    s.style.left = (Math.random()*100) + '%';
+    s.style.top = (Math.random()*100) + '%';
+    s.style.animationDelay = (Math.random()*5) + 's';
+    s.style.animationDuration = (3 + Math.random()*4) + 's';
+    wrap.appendChild(s);
+  }
+}
+spawnStars();
+
+function hideSplash(){
+  const splash = document.getElementById('splash');
+  if(!splash) return;
+  splash.classList.add('hide');
+  setTimeout(()=>splash.remove(), 700);
+}
+
+/* ================= AUTH (hesap sistemi) ================= */
+function showAuthScreen(){
+  document.getElementById('authScreen').classList.add('show');
+}
+function hideAuthScreen(){
+  document.getElementById('authScreen').classList.remove('show');
+  document.getElementById('authEmail').value = '';
+  document.getElementById('authPass').value = '';
+  document.getElementById('authError').textContent = '';
+}
+function authErrorText(err){
+  const code = err && err.code || '';
+  if(code.includes('invalid-email')) return 'E-posta adresi geçersiz görünüyor.';
+  if(code.includes('missing-password') || code.includes('weak-password')) return 'Şifre en az 6 karakter olmalı.';
+  if(code.includes('email-already-in-use')) return 'Bu e-posta ile zaten bir hesap var, giriş yapmayı dene.';
+  if(code.includes('user-not-found') || code.includes('wrong-password') || code.includes('invalid-credential')) return 'E-posta veya şifre hatalı.';
+  if(code.includes('network-request-failed')) return 'İnternet bağlantısı bulunamadı.';
+  if(code.includes('too-many-requests')) return 'Çok fazla deneme yapıldı, biraz sonra tekrar dene.';
+  return 'Bir şeyler ters gitti, tekrar dener misin?';
+}
+async function handleLogin(){
+  const email = document.getElementById('authEmail').value.trim();
+  const pass = document.getElementById('authPass').value;
+  const errEl = document.getElementById('authError');
+  errEl.textContent = '';
+  if(!email || !pass){ errEl.textContent = 'E-posta ve şifre gerekli.'; return; }
+  try{
+    await fbAuth.signInWithEmailAndPassword(email, pass);
+  }catch(e){ errEl.textContent = authErrorText(e); }
+}
+async function handleSignup(){
+  const email = document.getElementById('authEmail').value.trim();
+  const pass = document.getElementById('authPass').value;
+  const errEl = document.getElementById('authError');
+  errEl.textContent = '';
+  if(!email || !pass){ errEl.textContent = 'E-posta ve şifre gerekli.'; return; }
+  try{
+    await fbAuth.createUserWithEmailAndPassword(email, pass);
+  }catch(e){ errEl.textContent = authErrorText(e); }
+}
+function handleGuest(){
+  localStorage.setItem('luna-guest', '1');
+  hideAuthScreen();
+  currentUser = null;
+  loadData().then(renderAccountRow);
+}
+async function handleLogout(){
+  localStorage.removeItem('luna-guest');
+  if(fbAuth) await fbAuth.signOut();
+  location.reload();
+}
+function renderAccountRow(){
+  const row = document.getElementById('accountRow');
+  if(!row) return;
+  if(currentUser){
+    row.innerHTML = `<span class="account-email" title="${currentUser.email}">${currentUser.email}</span><button class="account-link" id="logoutBtn">Çıkış yap</button>`;
+    document.getElementById('logoutBtn').onclick = handleLogout;
+  }else{
+    row.innerHTML = `<span class="account-email">Misafir modu (senkron yok)</span><button class="account-link" id="loginPromptBtn">Hesap oluştur</button>`;
+    document.getElementById('loginPromptBtn').onclick = ()=>{ localStorage.removeItem('luna-guest'); showAuthScreen(); };
+  }
+}
+document.getElementById('authLoginBtn').onclick = handleLogin;
+document.getElementById('authSignupBtn').onclick = handleSignup;
+document.getElementById('authGuestBtn').onclick = handleGuest;
+document.getElementById('authPass').addEventListener('keydown', (e)=>{ if(e.key==='Enter') handleLogin(); });
+
+document.getElementById('treeSearch').addEventListener('input', renderTree);
+document.getElementById('hiddenSeriesCoverInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  const ser = getSeries(pendingCoverSeries);
+  if(!file || !ser){ e.target.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const k = Math.min(1, 640 / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      ser.cover = c.toDataURL('image/jpeg', .82);
+      renderTree(); applyCover(); saveNow();
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+(function(){
+  const sel = document.getElementById('styleSelect');
+  let st = localStorage.getItem('luna-style') || 'glass';
+  document.body.setAttribute('data-style', st);
+  sel.value = st;
+  sel.onchange = ()=>{ st = sel.value; localStorage.setItem('luna-style', st); document.body.setAttribute('data-style', st); };
+})();
+
+/* ===== v3.3: Ana sayfa (okuma sitesi tarzı) + seri sayfası + künye ===== */
+let homeSeriesId = null, heroTimer = null;
+function creditLines(ser){ return [ser.copyright || ''].concat(String(ser.credits || '').split('\n')).map(x=>x.trim()).filter(Boolean); }
+function serStats(ser){ const chs = allChapters(ser); return {ch: chs.length, se: ser.seasons.length}; }
+function lastChapterOf(ser){
+  let last = null; try{ last = JSON.parse(localStorage.getItem('luna-last') || 'null'); }catch(_){}
+  if(last && last.s === ser.id && getEpisode(last.s, last.se, last.e)) return last;
+  const chs = allChapters(ser); if(!chs.length) return null;
+  const c = chs[chs.length - 1]; return {s:ser.id, se:c.se.id, e:c.e.id};
+}
+function showHome(){ homeSeriesId = null; currentEpisodeId = null; renderTree(); renderMain(); if(window.innerWidth <= 820) closeSidebar(); }
+function openSeriesPage(id){ homeSeriesId = id; currentEpisodeId = null; renderMain(); }
+function coverStyle(ser){ return ser.cover ? ' style="background-image:url(&quot;' + ser.cover + '&quot;)"' : ''; }
+function serChips(ser){
+  const g = String(ser.genres || '').split(',').map(x=>x.trim()).filter(Boolean).slice(0, 4);
+  const k = KINDS.find(k=>k[0] === (ser.kind || 'script'));
+  return '<span class="chip">' + k[1] + '</span>' + statusChip(ser) + g.map(x=>'<span class="chip ghost">' + escapeHtml(x) + '</span>').join('');
+}
+function byLine(ser){ return [ser.author, ser.copyright].filter(Boolean).map(escapeHtml).join(' · '); }
+function goContinue(ser){
+  const lc = lastChapterOf(ser);
+  if(lc) selectEpisode(lc.s, lc.se, lc.e); else { flashToast(T('Önce bir bölüm ekle')); openSeriesPage(ser.id); }
+}
+function readFirst(ser){ const c = allChapters(ser)[0]; if(c) openReader(ser.id, c.e.id); else flashToast(T('Önce bir bölüm ekle')); }
+function serStatus(ser){ const l = ser.seasons.flatMap(x=>x.episodes).slice(-1)[0]; return l && ['final','ara','birakildi'].includes(l.tag) ? l.tag : 'devam'; }
+function statusChip(ser){ const k = serStatus(ser); return k === 'devam' ? '<span class="ep-tag tg-devam">Devam ediyor</span>' : tagBadge(k); }
+function serLastDate(ser){ let d = ''; allChapters(ser).forEach(c=>{ if(c.e.date && c.e.date > d) d = c.e.date; }); return d; }
+function metaHtml(ser){ const st = serStats(ser), d = serLastDate(ser); return '<span>' + st.ch + ' bölüm</span><span>' + st.se + ' sezon</span>' + (d ? '<span><b class="lbl">Çıkış</b> ' + fmtDate(d) + '</span>' : ''); }
+let lastView = '';
+function viewAnim(key){ if(key === lastView) return; lastView = key; const m = document.getElementById('mainContent'); m.classList.remove('vin'); void m.offsetWidth; m.classList.add('vin'); }
+function seriesCard(s, i){
+  const d = serLastDate(s);
+  return `<button class="scard" style="--i:${i}" data-ser="${s.id}"><span class="scard-cover"${coverStyle(s)}>${statusChip(s).replace('class="ep-tag', 'class="ep-tag pos')}${s.cover ? '' : '<span class="ph">' + escapeHtml((s.title || '?').trim().charAt(0).toUpperCase()) + '</span>'}</span><b>${escapeHtml(s.title)}</b><small>${escapeHtml(s.author || '')}</small><small>${serStats(s).ch} bölüm</small>${d ? '<small><b class="lbl">Çıkış</b> ' + fmtDate(d) + '</small>' : ''}</button>`;
+}
+function renderHome(main){
+  clearInterval(heroTimer);
+  main.classList.add('scroll');
+  const ser = homeSeriesId ? getSeries(homeSeriesId) : null;
+  if(homeSeriesId && !ser) homeSeriesId = null;
+  if(ser){ viewAnim('ser:' + ser.id); renderSeriesPage(main, ser); return; }
+  viewAnim('home');
+  if(!data.series.length){
+    main.innerHTML = '<div class="empty-state"><h2>Boş bir sayfa, sonsuz bir gece</h2><p>Henüz seri yok. Bir tane oluştur!</p><button class="fmt-btn" id="homeNew">Yeni seri</button></div>';
+    main.querySelector('#homeNew').onclick = ()=>addSeries(); return;
+  }
+  const slides = data.series.map((s,i)=>`<div class="slide${i === 0 ? ' active' : ''}" data-ser="${s.id}"><div class="slide-bg"${coverStyle(s)}></div><div class="slide-card"><div class="slide-cover"${coverStyle(s)}></div><div class="slide-info"><div class="chips">${serChips(s)}</div><h2>${escapeHtml(s.title)}</h2><div class="by">${byLine(s)}</div><p class="syn">${escapeHtml(s.synopsis || '')}</p><div class="meta">${metaHtml(s)}</div><div class="acts"><button class="fmt-btn primary" data-a="cont">Yazmaya devam et</button><button class="fmt-btn" data-a="page">Seri sayfası</button><button class="fmt-btn" data-a="read">📖 Oku</button></div></div></div></div>`).join('');
+  const multi = data.series.length > 1;
+  const nav = multi ? '<div class="hero-nav"><button class="fmt-btn" id="hPrev">‹</button><span class="dots">' + data.series.map((_,i)=>'<i class="' + (i === 0 ? 'on' : '') + '"></i>').join('') + '</span><button class="fmt-btn" id="hNext">›</button></div><div class="hero-bar"><i id="heroBar"></i></div>' : '';
+  let le = null, ls = null;
+  try{ const l = JSON.parse(localStorage.getItem('luna-last') || 'null'); if(l){ le = getEpisode(l.s, l.se, l.e); ls = getSeries(l.s); } }catch(_){}
+  const resume = (le && ls) ? `<button class="resume" id="homeResume"><span class="resume-cover"${coverStyle(ls)}></span><span class="resume-txt"><small>Son çalıştığın bölüm</small><b>${escapeHtml(le.title || 'İsimsiz bölüm')}</b><small>${escapeHtml(ls.title)}</small></span><span class="resume-go">→</span></button>` : '';
+  const order = [['devam','Devam eden seriler'],['final','Tamamlananlar'],['ara','Ara verilenler'],['birakildi','Bırakılanlar']];
+  const groups = order.map(g=>{ const L = data.series.filter(s=>serStatus(s) === g[0]); return L.length ? `<h3 class="home-h">${g[1]}</h3><div class="series-grid">${L.map(seriesCard).join('')}</div>` : ''; }).join('');
+  main.innerHTML = `<div class="home"><div class="home-top"><h1>Kitaplığım</h1><button class="fmt-btn" id="homeNew">+ Yeni seri</button></div><section class="hero" id="hero">${slides}${nav}</section>${resume}${groups}</div>`;
+  const sl = [...main.querySelectorAll('.slide')], bar = main.querySelector('#heroBar'); let cur = 0;
+  const go = (n)=>{
+    cur = (n + sl.length) % sl.length;
+    sl.forEach((el,i)=>{ el.classList.toggle('active', i === cur); el.classList.toggle('prev', i < cur); });
+    main.querySelectorAll('.dots i').forEach((d,i)=>d.classList.toggle('on', i === cur));
+    if(bar){ bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = ''; }
+  };
+  sl.forEach(el=>el.querySelectorAll('[data-a]').forEach(b=>b.onclick = ()=>{ const s = getSeries(el.dataset.ser), a = b.dataset.a; if(a === 'cont') goContinue(s); else if(a === 'page') openSeriesPage(s.id); else readFirst(s); }));
+  if(multi){
+    main.querySelector('#hPrev').onclick = ()=>go(cur - 1); main.querySelector('#hNext').onclick = ()=>go(cur + 1);
+    const hero = main.querySelector('#hero'); let x0 = null;
+    bar.onanimationend = ()=>go(cur + 1);
+    hero.onpointerdown = (e)=>{ x0 = e.clientX; }; hero.onpointerup = (e)=>{ if(x0 !== null && Math.abs(e.clientX - x0) > 50) go(cur + (e.clientX < x0 ? 1 : -1)); x0 = null; };
+    hero.onpointerenter = ()=>{ bar.style.animationPlayState = 'paused'; }; hero.onpointerleave = ()=>{ bar.style.animationPlayState = 'running'; };
+  }
+  main.querySelectorAll('.scard[data-ser]').forEach(b=>b.onclick = ()=>openSeriesPage(b.dataset.ser));
+  const rs = main.querySelector('#homeResume'); if(rs) rs.onclick = ()=>selectEpisode(ls.id, getEpisodeSeasonId(ls, le), le.id);
+  main.querySelector('#homeNew').onclick = ()=>addSeries();
+}
+function getEpisodeSeasonId(ser, ep){ const se = ser.seasons.find(x=>x.episodes.some(e=>e.id === ep.id)); return se ? se.id : ''; }
+function renderSeriesPage(main, ser){
+  const st = serStats(ser);
+  const seasons = ser.seasons.map(se=>{ const L = epLabels(se);
+    return `<div class="sp-season"><h4>${escapeHtml(se.title)}</h4>` + (se.episodes.length ? se.episodes.map((e,i)=>`<button class="sp-ch" data-s="${se.id}" data-e="${e.id}"><span class="n">${L[i]}</span><span class="t">${escapeHtml(e.title || 'İsimsiz bölüm')}</span>${tagBadge(e.tag)}<small>${e.date ? fmtDate(e.date) : ''}</small><span class="tick${e.status === 'bitti' ? ' done' : ''}"></span></button>`).join('') : '<p class="muted">Henüz bölüm yok</p>') + '</div>'; }).join('');
+  main.innerHTML = `<div class="spage"><button class="fmt-btn" id="spBack">← Ana sayfa</button><div class="sp-head"><div class="slide-cover"${coverStyle(ser)}></div><div class="sp-info"><div class="chips">${serChips(ser)}</div><h1>${escapeHtml(ser.title)}</h1><div class="by">${byLine(ser)}</div><p class="syn full">${escapeHtml(ser.synopsis || '')}</p><div class="meta">${metaHtml(ser)}</div><div class="acts"><button class="fmt-btn primary" id="spCont">Yazmaya devam et</button><button class="fmt-btn" id="spRead">📖 Oku</button><button class="fmt-btn" id="spInfo">Seri bilgisi</button><button class="fmt-btn" id="spEpub">↓ EPUB</button><button class="fmt-btn" id="spTxt">↓ TXT</button></div></div></div>${seasons}</div>`;
+  main.querySelector('#spBack').onclick = showHome;
+  main.querySelector('#spCont').onclick = ()=>goContinue(ser);
+  main.querySelector('#spRead').onclick = ()=>readFirst(ser);
+  main.querySelector('#spInfo').onclick = ()=>openSeriesInfo(ser.id);
+  main.querySelector('#spEpub').onclick = ()=>exportEpub(ser);
+  main.querySelector('#spTxt').onclick = ()=>exportSeries(ser);
+  main.querySelectorAll('.sp-ch').forEach(b=>b.onclick = ()=>selectEpisode(ser.id, b.dataset.s, b.dataset.e));
+}
+(function(){ const b = document.querySelector('.brand-row'); if(b){ b.style.cursor = 'pointer'; b.title = 'Ana sayfa'; b.onclick = showHome; } })();
+
+(function(){
+  const b = document.getElementById('authForgotBtn');
+  b.onclick = async ()=>{
+    const email = document.getElementById('authEmail').value.trim(), err = document.getElementById('authError');
+    err.classList.remove('ok'); err.textContent = '';
+    if(!email){ err.textContent = 'Önce yukarıya e-posta adresini yaz.'; return; }
+    try{
+      if(typeof fbAuth === 'undefined' || !fbAuth) throw {code:'network-request-failed'};
+      fbAuth.languageCode = LANG;
+      await fbAuth.sendPasswordResetEmail(email);
+      err.classList.add('ok'); err.textContent = 'Şifre sıfırlama bağlantısı gönderildi. E-postanı (ve spam klasörünü) kontrol et.';
+    }catch(e){ err.textContent = (e && e.code && e.code.includes('user-not-found')) ? 'Bu e-posta ile kayıtlı hesap bulunamadı.' : authErrorText(e); }
+  };
+})();
+/* ===== v3.1: Seri bilgisi, EPUB, okuma modu ===== */
+const KINDS = [['script','Senaryo'],['novel','Roman / Light novel'],['manga','Manga']];
+function scriptLines(html){
+  const d = document.createElement('div');
+  d.innerHTML = (html || '').replace(/<rt>.*?<\/rt>/gi, '').replace(/<br\s*\/?>/gi, '\n').replace(/<\/(div|p|li)>/gi, '\n');
+  const out = [];
+  (d.textContent || '').split('\n').forEach(x=>{ x = x.replace(/\u00a0/g, ' ').trim(); if(x || (out.length && out[out.length-1])) out.push(x); });
+  return out;
+}
+function allChapters(ser){
+  const out = [];
+  ser.seasons.forEach(se=>{ const L = epLabels(se); se.episodes.forEach((e,i)=>out.push({se, e, label:L[i]})); });
+  return out;
+}
+function xesc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function dlBlob(blob, name){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+}
+function crc32(b){
+  let t = crc32.t;
+  if(!t){ t = crc32.t = []; for(let n = 0; n < 256; n++){ let c = n; for(let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } }
+  let r = -1; for(let i = 0; i < b.length; i++) r = t[(r ^ b[i]) & 255] ^ (r >>> 8);
+  return (r ^ -1) >>> 0;
+}
+function zipStore(files){
+  const enc = new TextEncoder(); let off = 0; const chunks = [], cd = [];
+  files.forEach(f=>{
+    const nm = enc.encode(f.name), crc = crc32(f.data), sz = f.data.length;
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(12, 0x21, true);
+    h.setUint32(14, crc, true); h.setUint32(18, sz, true); h.setUint32(22, sz, true); h.setUint16(26, nm.length, true);
+    chunks.push(new Uint8Array(h.buffer), nm, f.data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(14, 0x21, true);
+    c.setUint32(16, crc, true); c.setUint32(20, sz, true); c.setUint32(24, sz, true); c.setUint16(28, nm.length, true); c.setUint32(42, off, true);
+    cd.push(new Uint8Array(c.buffer), nm); off += 30 + nm.length + sz;
+  });
+  let cdSize = 0; cd.forEach(x=>{ cdSize += x.length; });
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, cdSize, true); e.setUint32(16, off, true);
+  return new Blob([...chunks, ...cd, new Uint8Array(e.buffer)], {type:'application/epub+zip'});
+}
+function exportEpub(ser){
+  const chs = allChapters(ser);
+  if(!chs.length){ flashToast(T('Önce bir bölüm ekle')); return; }
+  const enc = new TextEncoder(), u8 = (x)=>enc.encode(x), X = '<?xml version="1.0" encoding="utf-8"?>';
+  const files = [
+    {name:'mimetype', data:u8('application/epub+zip')},
+    {name:'META-INF/container.xml', data:u8(X + '<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>')},
+    {name:'OEBPS/style.css', data:u8('body{font-family:serif;line-height:1.6}h1{text-align:center;margin:1.5em 0}p{margin:0 0 .8em;text-indent:1em}p.sep{text-align:center;text-indent:0}p.gap{height:1em}p.credit{text-align:center;text-indent:0;font-size:.85em;margin:0 0 .3em}')}
+  ];
+  const items = [], spine = [], nav = [];
+  const endHtml = '<p class="sep">' + xesc(T('Bölüm sonu')) + '</p>' + creditLines(ser).map(l=>'<p class="credit">' + xesc(l) + '</p>').join('');
+  chs.forEach((c,i)=>{
+    const id = 'c' + i, title = c.label + '. ' + (c.e.title || '—');
+    const body = scriptLines(c.e.script).map(l=>!l ? '<p class="gap"></p>' : (/^[*＊\s]{3,}$/.test(l) ? '<p class="sep">' + xesc(l) + '</p>' : '<p>' + xesc(l) + '</p>')).join('');
+    files.push({name:'OEBPS/' + id + '.xhtml', data:u8(X + '<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="utf-8"/><title>' + xesc(title) + '</title><link rel="stylesheet" href="style.css"/></head><body><h1>' + xesc(title) + '</h1>' + body + endHtml + '</body></html>')});
+    items.push('<item id="' + id + '" href="' + id + '.xhtml" media-type="application/xhtml+xml"/>');
+    spine.push('<itemref idref="' + id + '"/>');
+    nav.push('<li><a href="' + id + '.xhtml">' + xesc(c.se.title + ' — ' + title) + '</a></li>');
+  });
+  files.push({name:'OEBPS/nav.xhtml', data:u8(X + '<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"><head><meta charset="utf-8"/><title>Contents</title></head><body><nav epub:type="toc" id="toc"><ol>' + nav.join('') + '</ol></nav></body></html>')});
+  let cover = '';
+  const m = (ser.cover || '').match(/^data:image\/(\w+);base64,(.+)$/);
+  if(m){
+    const bin = atob(m[2]), arr = new Uint8Array(bin.length);
+    for(let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    const ext = m[1] === 'jpeg' ? 'jpg' : m[1];
+    files.push({name:'OEBPS/cover.' + ext, data:arr});
+    cover = '<item id="cover" href="cover.' + ext + '" media-type="image/' + m[1] + '" properties="cover-image"/>';
+  }
+  const metaExtra = (ser.copyright ? '<dc:publisher>' + xesc(ser.copyright) + '</dc:publisher><dc:rights>' + xesc(ser.copyright) + '</dc:rights>' : '') + (ser.synopsis ? '<dc:description>' + xesc(ser.synopsis) + '</dc:description>' : '') + String(ser.genres || '').split(',').map(g=>g.trim()).filter(Boolean).map(g=>'<dc:subject>' + xesc(g) + '</dc:subject>').join('');
+  files.push({name:'OEBPS/content.opf', data:u8(X + '<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="uid"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="uid">luna-' + ser.id + '</dc:identifier><dc:title>' + xesc(ser.title) + '</dc:title><dc:creator>' + xesc(ser.author || 'Unknown') + '</dc:creator><dc:language>' + LANG + '</dc:language>' + metaExtra + '<meta property="dcterms:modified">' + new Date().toISOString().replace(/\.\d+Z$/, 'Z') + '</meta></metadata><manifest><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/><item id="css" href="style.css" media-type="text/css"/>' + cover + items.join('') + '</manifest><spine>' + spine.join('') + '</spine></package>')});
+  dlBlob(zipStore(files), (ser.title || 'series').replace(/[\\/:*?"<>|]/g, '') + '.epub');
+}
+function closeOverlays(){ document.querySelectorAll('.reader,.modal-back').forEach(x=>x.remove()); }
+document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeOverlays(); });
+function openSeriesInfo(serId){
+  const ser = getSeries(serId); if(!ser) return;
+  closeOverlays();
+  const m = document.createElement('div'); m.className = 'modal-back';
+  m.innerHTML = `<div class="modal"><h3>Seri bilgisi</h3>
+    <label>Yazı türü<select id="siKind">${KINDS.map(k=>`<option value="${k[0]}"${(ser.kind || 'script') === k[0] ? ' selected' : ''}>${k[1]}</option>`).join('')}</select></label>
+    <label>Yazar<input id="siAuthor" placeholder="Yazar adı" value="${escapeAttr(ser.author || '')}"></label>
+    <label>Telif / yayımcı satırı<input id="siCopy" placeholder="©UNEXCITING / DevilMad Studio" value="${escapeAttr(ser.copyright || '')}"></label>
+    <label>Künye (her satır ayrı)<textarea id="siCredits" rows="3" placeholder="Çizer, çevirmen, editör...">${escapeHtml(ser.credits || '')}</textarea></label>
+    <label>Metin dili<select id="siWlang">${[['','Otomatik'],['tr','Türkçe'],['en','English'],['es','Español'],['de','Deutsch'],['ko','한국어'],['ja','日本語']].map(l=>`<option value="${l[0]}"${(ser.wlang || '') === l[0] ? ' selected' : ''}>${l[1]}</option>`).join('')}</select></label>
+    <label>Türler (virgülle ayır)<input id="siGenres" placeholder="Aksiyon, fantezi, ..." value="${escapeAttr(ser.genres || '')}"></label>
+    <label>Seri özeti<textarea id="siSyn" rows="4" placeholder="Seri hakkında kısa bir tanıtım...">${escapeHtml(ser.synopsis || '')}</textarea></label>
+    <div class="modal-row"><button class="fmt-btn" id="siEpub">↓ EPUB</button><span style="flex:1"></span><button class="fmt-btn" id="siClose">Kapat</button><button class="fmt-btn" id="siSave">Kaydet</button></div></div>`;
+  document.body.appendChild(m);
+  m.onclick = (e)=>{ if(e.target === m) m.remove(); };
+  m.querySelector('#siClose').onclick = ()=>m.remove();
+  m.querySelector('#siEpub').onclick = ()=>exportEpub(ser);
+  m.querySelector('#siSave').onclick = ()=>{
+    ser.kind = m.querySelector('#siKind').value; ser.author = m.querySelector('#siAuthor').value.trim();
+    ser.genres = m.querySelector('#siGenres').value.trim();
+    ser.copyright = m.querySelector('#siCopy').value.trim(); ser.credits = m.querySelector('#siCredits').value.trim(); ser.wlang = m.querySelector('#siWlang').value; ser.synopsis = m.querySelector('#siSyn').value.trim();
+    m.remove(); saveNow(); if(currentEpisodeId) renderMain(); flashToast('Kaydedildi');
+  };
+}
+function openReader(serId, epId){
+  const ser = getSeries(serId); if(!ser) return;
+  const chs = allChapters(ser); if(!chs.length) return;
+  let i = Math.max(0, chs.findIndex(c=>c.e.id === epId));
+  closeOverlays();
+  const o = document.createElement('div'); o.className = 'reader';
+  o.innerHTML = '<div class="reader-bar"><button class="fmt-btn" id="rdPrev">Önceki</button><span class="reader-title"></span><button class="fmt-btn" id="rdNext">Sonraki</button><button class="fmt-btn" id="rdClose">Kapat</button></div><div class="reader-body" id="rdBody"></div>';
+  document.body.appendChild(o);
+  const body = o.querySelector('#rdBody');
+  const show = ()=>{
+    const c = chs[i], t = c.label + '. ' + (c.e.title || 'İsimsiz bölüm');
+    o.querySelector('.reader-title').textContent = t;
+    body.innerHTML = '';
+    const h = document.createElement('h1'); h.textContent = t; body.appendChild(h);
+    scriptLines(c.e.script).forEach(l=>{ const p = document.createElement('p'); if(l) p.textContent = l; else p.className = 'gap'; body.appendChild(p); });
+    const end = document.createElement('div'); end.className = 'reader-end'; end.textContent = T('Bölüm sonu'); body.appendChild(end);
+    const cl = creditLines(ser);
+    if(cl.length){ const cr = document.createElement('div'); cr.className = 'reader-credits'; cl.forEach(l=>{ const d = document.createElement('div'); d.textContent = l; cr.appendChild(d); }); body.appendChild(cr); }
+    body.scrollTop = 0;
+    o.querySelector('#rdPrev').disabled = i === 0; o.querySelector('#rdNext').disabled = i === chs.length - 1;
+  };
+  o.querySelector('#rdPrev').onclick = ()=>{ if(i > 0){ i--; show(); } };
+  o.querySelector('#rdNext').onclick = ()=>{ if(i < chs.length - 1){ i++; show(); } };
+  o.querySelector('#rdClose').onclick = ()=>o.remove();
+  show();
+}
+
+/* ================= i18n (ana dil: İngilizce) + otomatik düzeltme + performans ================= */
+const I18N_RAW = `Senaryo|Script|Guion|Drehbuch|시나리오|脚本
+Notlar|Notes|Notas|Notizen|노트|ノート
+Karakterler|Characters|Personajes|Figuren|캐릭터|キャラクター
+Görseller|Images|Imágenes|Bilder|이미지|画像
+Devam ediyor|In progress|En curso|In Arbeit|진행 중|連載中
+Bitti|Done|Terminado|Fertig|완료|完了
+Detay|Details|Detalles|Details|상세|詳細
+Odak|Focus|Enfoque|Fokus|집중|集中
+● kaydedildi|● saved|● guardado|● gespeichert|● 저장됨|● 保存済み
+● kaydediliyor…|● saving…|● guardando…|● speichert…|● 저장 중…|● 保存中…
+Kaydedildi|Saved|Guardado|Gespeichert|저장됨|保存しました
+Çıkış|Release|Estreno|Veröffentlichung|공개일|公開日
+Çıkış tarihi|Release date|Fecha de estreno|Veröffentlichungsdatum|공개일|公開日
+Durum|Status|Estado|Status|상태|状態
+Sıra|Order|Orden|Reihenfolge|순서|並び順
+Final|Final|Final|Finale|최종화|最終話
+Sezon finali|Season finale|Final de temporada|Staffelfinale|시즌 피날레|シーズン最終話
+Ara verildi|On hiatus|En pausa|Pausiert|휴재|休載
+Bırakıldı|Dropped|Abandonada|Abgebrochen|중단|打ち切り
+Yazım denetimi|Spell check|Corrector ortográfico|Rechtschreibprüfung|맞춤법 검사|スペルチェック
+Otomatik düzeltme|Auto-correct|Autocorrección|Autokorrektur|자동 고침|自動修正
+⋯ Araçlar|⋯ Tools|⋯ Herramientas|⋯ Werkzeuge|⋯ 도구|⋯ ツール
+Daha fazla araç|More tools|Más herramientas|Weitere Werkzeuge|더 많은 도구|その他のツール
++ Sahne|+ Scene|+ Escena|+ Szene|+ 장면|+ シーン
++ Diyalog|+ Dialogue|+ Diálogo|+ Dialog|+ 대사|+ セリフ
++ Yönlendirme|+ Direction|+ Acotación|+ Regieanweisung|+ 지문|+ ト書き
++ Sayfa|+ Page|+ Página|+ Seite|+ 페이지|+ ページ
++ Panel|+ Panel|+ Viñeta|+ Panel|+ 컷|+ コマ
++ SFX|+ SFX|+ SFX|+ SFX|+ 효과음|+ 効果音
++ Anlatı|+ Narration|+ Narración|+ Erzähltext|+ 내레이션|+ ナレーション
+☐ Kutucuk|☐ Checkbox|☐ Casilla|☐ Kontrollkästchen|☐ 체크박스|☐ チェック
+✎ Yazar notu|✎ Author's note|✎ Nota del autor|✎ Autorenanmerkung|✎ 작가 노트|✎ 作者メモ
+⇄ Bul / değiştir|⇄ Find / replace|⇄ Buscar / reemplazar|⇄ Suchen / ersetzen|⇄ 찾기 / 바꾸기|⇄ 検索 / 置換
+Karakter ekle…|Add character…|Añadir personaje…|Figur einfügen…|캐릭터 추가…|キャラ挿入…
+↓ Dışa aktar (.txt)|↓ Export (.txt)|↓ Exportar (.txt)|↓ Exportieren (.txt)|↓ 내보내기 (.txt)|↓ 書き出し (.txt)
+↓ Yedek indir (.json)|↓ Download backup (.json)|↓ Descargar copia (.json)|↓ Backup herunterladen (.json)|↓ 백업 다운로드 (.json)|↓ バックアップを保存 (.json)
+↑ Yedekten yükle|↑ Restore from backup|↑ Restaurar copia|↑ Aus Backup laden|↑ 백업에서 복원|↑ バックアップから復元
+Yeni seri|New series|Nueva serie|Neue Serie|새 시리즈|新しいシリーズ
++ Yeni sezon|+ New season|+ Nueva temporada|+ Neue Staffel|+ 새 시즌|+ 新シーズン
++ Yeni bölüm|+ New chapter|+ Nuevo capítulo|+ Neues Kapitel|+ 새 챕터|+ 新しい章
++ Buçuk bölüm (x.5)|+ Half chapter (x.5)|+ Medio capítulo (x.5)|+ Halbes Kapitel (x.5)|+ 반 챕터 (x.5)|+ 半章 (x.5)
+Yeni Seri|New Series|Nueva serie|Neue Serie|새 시리즈|新シリーズ
+Yeni Sezon|New Season|Nueva temporada|Neue Staffel|새 시즌|新シーズン
+İsimsiz Seri|Untitled Series|Serie sin título|Unbenannte Serie|제목 없는 시리즈|無題のシリーズ
+İsimsiz Sezon|Untitled Season|Temporada sin título|Unbenannte Staffel|제목 없는 시즌|無題のシーズン
+İsimsiz bölüm|Untitled chapter|Capítulo sin título|Unbenanntes Kapitel|제목 없는 챕터|無題の章
+İsimsiz Bölüm|Untitled Chapter|Capítulo sin título|Unbenanntes Kapitel|제목 없는 챕터|無題の章
+Arka plan animasyonu|Background animation|Animación de fondo|Hintergrundanimation|배경 애니메이션|背景アニメーション
+Tasarım stili|Design style|Estilo de diseño|Designstil|디자인 스타일|デザインスタイル
+Performans modu|Performance|Rendimiento|Leistung|성능|パフォーマンス
+Otomatik|Auto|Automático|Automatisch|자동|自動
+Hafif|Light|Ligero|Leicht|가벼움|軽量
+Tam|Full|Completo|Voll|전체|フル
+Cam (modern)|Glass (modern)|Cristal (moderno)|Glas (modern)|글래스 (모던)|ガラス (モダン)
+Sakin mod (tüm animasyonlar kapalı)|Calm mode (all animations off)|Modo calmo (sin animaciones)|Ruhemodus (alle Animationen aus)|차분 모드 (모든 애니메이션 끔)|静かモード（アニメーションすべてオフ）
+Animasyonları kapat/aç|Toggle animations|Activar/desactivar animaciones|Animationen ein/aus|애니메이션 켜기/끄기|アニメーション切替
+Mürekkep benekleri|Ink specks|Motas de tinta|Tintenflecken|잉크 점|インクの粒
+Yumuşak parıltı|Soft glow|Brillo suave|Sanftes Leuchten|부드러운 빛|やわらかな光
+Yükselen parçacıklar|Rising particles|Partículas ascendentes|Aufsteigende Partikel|떠오르는 입자|昇る粒子
+Kayan ışık|Drifting light|Luz a la deriva|Treibendes Licht|흐르는 빛|流れる光
+Yağmur|Rain|Lluvia|Regen|비|雨
+Aurora|Aurora|Aurora|Aurora|오로라|オーロラ
+Kapalı|Off|Apagado|Aus|끔|オフ
+Luna (gece)|Luna (night)|Luna (noche)|Luna (Nacht)|루나 (밤)|ルナ（夜）
+Sakura|Sakura|Sakura|Sakura|사쿠라|サクラ
+Orman|Forest|Bosque|Wald|숲|森
+Parşömen (gündüz)|Parchment (day)|Pergamino (día)|Pergament (Tag)|양피지 (낮)|羊皮紙（昼）
+Gece Mavisi|Midnight Blue|Azul medianoche|Mitternachtsblau|미드나잇 블루|ミッドナイトブルー
+Kehribar|Amber|Ámbar|Bernstein|호박색|琥珀
+Giriş yap|Log in|Iniciar sesión|Anmelden|로그인|ログイン
+Hesap oluştur|Create account|Crear cuenta|Konto erstellen|계정 만들기|アカウント作成
+Hesapsız devam et (bu cihazda kalır)|Continue without account (stays on this device)|Continuar sin cuenta (se queda en este dispositivo)|Ohne Konto fortfahren (bleibt auf diesem Gerät)|계정 없이 계속 (이 기기에만 저장)|アカウントなしで続ける（この端末のみ）
+Misafir modu (senkron yok)|Guest mode (no sync)|Modo invitado (sin sincronización)|Gastmodus (keine Synchronisierung)|게스트 모드 (동기화 없음)|ゲストモード（同期なし）
+Çıkış yap|Log out|Cerrar sesión|Abmelden|로그아웃|ログアウト
+E-posta|Email|Correo electrónico|E-Mail|이메일|メール
+Şifre (en az 6 karakter)|Password (min. 6 characters)|Contraseña (mín. 6 caracteres)|Passwort (mind. 6 Zeichen)|비밀번호 (6자 이상)|パスワード（6文字以上）
+veya|or|o|oder|또는|または
+Senaryoların sana özel, güvenli bir hesapta saklansın|Keep your stories safe in a private account|Guarda tus historias en una cuenta privada y segura|Speichere deine Geschichten sicher in einem privaten Konto|이야기를 안전한 개인 계정에 보관하세요|物語を安全な個人アカウントに保存しましょう
+SENARYO ATÖLYESİ|STORY WORKSHOP|TALLER DE HISTORIAS|GESCHICHTENWERKSTATT|이야기 작업실|物語工房
+SENARYO ATÖLYESİ AÇILIYOR|OPENING THE STORY WORKSHOP|ABRIENDO EL TALLER|WERKSTATT WIRD GEÖFFNET|작업실을 여는 중|工房を開いています
+Boş bir sayfa, sonsuz bir gece|An empty page, an endless night|Una página en blanco, una noche infinita|Eine leere Seite, eine endlose Nacht|빈 페이지, 끝없는 밤|白紙のページ、終わらない夜
+Soldan bir seri aç, içine bir sezon ve bölüm ekle. Seri, sezon, bölüm, not, karakter ve görseller — hepsi girdiğin anda otomatik kaydedilir.|Open a series on the left, then add a season and a chapter. Everything you write is saved automatically.|Abre una serie a la izquierda y añade una temporada y un capítulo. Todo lo que escribas se guarda automáticamente.|Öffne links eine Serie und füge eine Staffel und ein Kapitel hinzu. Alles wird automatisch gespeichert.|왼쪽에서 시리즈를 열고 시즌과 챕터를 추가하세요. 작성한 내용은 자동으로 저장됩니다.|左でシリーズを開き、シーズンと章を追加してください。書いた内容は自動保存されます。
+Referans görselleri, mekan/karakter çizimleri veya kapak görseli ekle. Görüntüler bu bölüme kaydedilir.|Add reference images, location or character art, or a cover. Images are stored with this chapter.|Añade imágenes de referencia, arte de lugares o personajes, o una portada. Se guardan con este capítulo.|Füge Referenzbilder, Orts- oder Figurenzeichnungen oder ein Cover hinzu. Bilder werden mit diesem Kapitel gespeichert.|참고 이미지, 장소/캐릭터 그림 또는 표지를 추가하세요. 이미지는 이 챕터에 저장됩니다.|参考画像、背景やキャラの絵、表紙を追加できます。画像はこの章に保存されます。
+Metni seç, üstteki renklerden birine tıkla — sadece seçtiğin kelime/cümle renklenir. Kırmızı çizgili kelimeye sağ tıklayınca yazım önerisi çıkar.|Select text, then click a color above — only your selection gets colored. Right-click a red-underlined word for spelling suggestions.|Selecciona texto y pulsa un color arriba: solo se colorea la selección. Haz clic derecho en una palabra subrayada en rojo para ver sugerencias.|Text markieren und oben eine Farbe wählen – nur die Auswahl wird gefärbt. Rechtsklick auf ein rot unterstrichenes Wort zeigt Vorschläge.|텍스트를 선택하고 위의 색을 누르면 선택한 부분만 색이 바뀝니다. 빨간 밑줄 단어를 우클릭하면 맞춤법 제안이 나옵니다.|文字を選んで上の色を押すと、選択部分だけ色が変わります。赤い下線の単語を右クリックすると修正候補が出ます。
+Konu özeti|Synopsis|Sinopsis|Zusammenfassung|줄거리|あらすじ
+Dünya kurgusu|Worldbuilding|Mundo y ambientación|Weltaufbau|세계관|世界観
+Sahne akışı|Scene outline|Esquema de escenas|Szenenablauf|장면 구성|シーン構成
+Diğer|Other|Otros|Sonstiges|기타|その他
+Renk:|Color:|Color:|Farbe:|색상:|色:
+Rengi temizle|Clear color|Quitar color|Farbe entfernen|색 지우기|色を消去
+Özel renk|Custom color|Color personalizado|Eigene Farbe|사용자 색|カスタムカラー
+Kırmızı|Red|Rojo|Rot|빨강|赤
+Sarı|Yellow|Amarillo|Gelb|노랑|黄
+Yeşil|Green|Verde|Grün|초록|緑
+Turkuaz|Teal|Turquesa|Türkis|청록|ターコイズ
+Mavi|Blue|Azul|Blau|파랑|青
+Mor|Purple|Morado|Lila|보라|紫
+Pembe|Pink|Rosa|Rosa|분홍|ピンク
+Turuncu|Orange|Naranja|Orange|주황|オレンジ
++ Görsel yükle|+ Upload image|+ Subir imagen|+ Bild hochladen|+ 이미지 업로드|+ 画像をアップロード
++ Karakter ekle|+ Add character|+ Añadir personaje|+ Figur hinzufügen|+ 캐릭터 추가|+ キャラ追加
+Bölüm başlığı...|Chapter title...|Título del capítulo...|Kapitelüberschrift...|챕터 제목...|章のタイトル...
+Bir zamanlar...|Once upon a time...|Érase una vez...|Es war einmal...|옛날 옛적에...|むかしむかし...
+Bu bölümde ne oluyor?|What happens in this chapter?|¿Qué pasa en este capítulo?|Was passiert in diesem Kapitel?|이 챕터에서 무슨 일이 일어나나요?|この章では何が起こる？
+Mekanlar, kurallar, arka plan...|Places, rules, background...|Lugares, reglas, trasfondo...|Orte, Regeln, Hintergrund...|장소, 규칙, 배경...|場所、ルール、背景...
+Aklına takılan her şey...|Anything on your mind...|Todo lo que se te ocurra...|Alles, was dir einfällt...|떠오르는 모든 것...|思いついたこと何でも...
+Karakter adı|Character name|Nombre del personaje|Name der Figur|캐릭터 이름|キャラ名
+Kısa tanım, motivasyon, ses tonu...|Short description, motivation, tone of voice...|Descripción breve, motivación, tono de voz...|Kurzbeschreibung, Motivation, Tonfall...|짧은 설명, 동기, 말투...|短い説明、動機、口調...
+Bölüm veya metin ara…|Search chapters or text…|Buscar capítulos o texto…|Kapitel oder Text suchen…|챕터 또는 텍스트 검색…|章や本文を検索…
+Açıklama ekle...|Add a caption...|Añadir descripción...|Beschriftung hinzufügen...|설명 추가...|キャプションを追加...
+Menüyü aç|Open menu|Abrir menú|Menü öffnen|메뉴 열기|メニューを開く
+Sil|Delete|Eliminar|Löschen|삭제|削除
+Seriyi sil|Delete series|Eliminar serie|Serie löschen|시리즈 삭제|シリーズを削除
+Sezonu sil|Delete season|Eliminar temporada|Staffel löschen|시즌 삭제|シーズンを削除
+Kalın|Bold|Negrita|Fett|굵게|太字
+İtalik (iç ses, vurgu)|Italic (inner voice, emphasis)|Cursiva (voz interior, énfasis)|Kursiv (innere Stimme, Betonung)|기울임 (속마음, 강조)|斜体（心の声、強調）
+Roman sahne ayracı|Scene break|Separador de escena|Szenentrenner|장면 구분선|場面区切り
+Manga: yeni sayfa|Manga: new page|Manga: nueva página|Manga: neue Seite|만화: 새 페이지|マンガ：新しいページ
+Manga: yeni panel|Manga: new panel|Manga: nueva viñeta|Manga: neues Panel|만화: 새 컷|マンガ：新しいコマ
+Ses efekti|Sound effect|Efecto de sonido|Soundeffekt|효과음|効果音
+Anlatı kutusu|Narration box|Cuadro de narración|Erzählbox|내레이션 박스|ナレーションボックス
+Odak modu (Esc ile çık)|Focus mode (Esc to exit)|Modo enfoque (Esc para salir)|Fokusmodus (Esc zum Beenden)|집중 모드 (Esc로 종료)|集中モード（Escで終了）
+Yazıyı küçült|Smaller text|Texto más pequeño|Kleinere Schrift|글자 작게|文字を小さく
+Yazıyı büyüt|Larger text|Texto más grande|Größere Schrift|글자 크게|文字を大きく
+Bölümü yukarı taşı|Move chapter up|Subir capítulo|Kapitel nach oben|챕터 위로|章を上へ
+Bölümü aşağı taşı|Move chapter down|Bajar capítulo|Kapitel nach unten|챕터 아래로|章を下へ
+Altına buçuk bölüm ekle (örn. 4.5)|Add a half chapter below (e.g. 4.5)|Añadir medio capítulo debajo (p. ej. 4.5)|Halbes Kapitel darunter einfügen (z. B. 4.5)|아래에 반 챕터 추가 (예: 4.5)|下に半章を追加（例：4.5）
+Seri kapağı ekle / değiştir|Add / change series cover|Añadir / cambiar portada|Serien-Cover hinzufügen / ändern|시리즈 표지 추가 / 변경|シリーズの表紙を追加／変更
+Seri kapağı (değiştirmek için tıkla)|Series cover (click to change)|Portada de la serie (clic para cambiar)|Serien-Cover (zum Ändern klicken)|시리즈 표지 (클릭하여 변경)|シリーズの表紙（クリックで変更）
+Kapağı kaldır|Remove cover|Quitar portada|Cover entfernen|표지 삭제|表紙を削除
+İpuçları|Tips|Consejos|Tipps|도움말|ヒント
+Önce bir bölüm ekle|Add a chapter first|Añade un capítulo primero|Füge zuerst ein Kapitel hinzu|먼저 챕터를 추가하세요|先に章を追加してください
+Önce metni seç|Select some text first|Selecciona texto primero|Markiere zuerst Text|먼저 텍스트를 선택하세요|先に文字を選択してください
+Furigana okunuşu:|Reading (furigana):|Lectura (furigana):|Lesung (Furigana):|읽는 법 (후리가나):|ふりがな:
+Aranacak metin:|Find:|Buscar:|Suchen:|찾을 내용:|検索:
+Yeni metin:|Replace with:|Reemplazar con:|Ersetzen durch:|바꿀 내용:|置換後:
+Tüm seride değiştirilsin mi? (İptal = sadece bu bölüm)|Replace in the whole series? (Cancel = this chapter only)|¿Reemplazar en toda la serie? (Cancelar = solo este capítulo)|In der ganzen Serie ersetzen? (Abbrechen = nur dieses Kapitel)|시리즈 전체에서 바꿀까요? (취소 = 이 챕터만)|シリーズ全体で置換しますか？（キャンセル＝この章のみ）
+Değiştirilen|Replaced|Reemplazados|Ersetzt|바뀐 횟수|置換数
+Dosya okunamadı|Could not read the file|No se pudo leer el archivo|Datei konnte nicht gelesen werden|파일을 읽을 수 없습니다|ファイルを読み込めません
+Geçersiz yedek dosyası|Invalid backup file|Archivo de copia no válido|Ungültige Backup-Datei|잘못된 백업 파일|無効なバックアップファイル
+Yedek indirildi|Backup downloaded|Copia descargada|Backup heruntergeladen|백업 다운로드 완료|バックアップを保存しました
+Yedek indirilemedi|Could not download backup|No se pudo descargar la copia|Backup konnte nicht heruntergeladen werden|백업을 다운로드할 수 없습니다|バックアップを保存できませんでした
+Yedek yüklendi ve kaydedildi|Backup restored and saved|Copia restaurada y guardada|Backup wiederhergestellt und gespeichert|백업을 복원하고 저장했습니다|バックアップを復元して保存しました
+E-posta ve şifre gerekli.|Email and password are required.|Se requieren correo y contraseña.|E-Mail und Passwort sind erforderlich.|이메일과 비밀번호가 필요합니다.|メールとパスワードが必要です。
+E-posta adresi geçersiz görünüyor.|The email address looks invalid.|El correo no parece válido.|Die E-Mail-Adresse scheint ungültig.|이메일 주소가 올바르지 않습니다.|メールアドレスが無効です。
+Şifre en az 6 karakter olmalı.|Password must be at least 6 characters.|La contraseña debe tener al menos 6 caracteres.|Das Passwort muss mindestens 6 Zeichen haben.|비밀번호는 6자 이상이어야 합니다.|パスワードは6文字以上必要です。
+Bu e-posta ile zaten bir hesap var, giriş yapmayı dene.|An account with this email already exists. Try logging in.|Ya existe una cuenta con este correo. Prueba a iniciar sesión.|Mit dieser E-Mail existiert bereits ein Konto. Versuche dich anzumelden.|이미 이 이메일로 가입된 계정이 있습니다. 로그인해 보세요.|このメールのアカウントは既にあります。ログインしてください。
+E-posta veya şifre hatalı.|Incorrect email or password.|Correo o contraseña incorrectos.|E-Mail oder Passwort falsch.|이메일 또는 비밀번호가 틀렸습니다.|メールまたはパスワードが違います。
+İnternet bağlantısı bulunamadı.|No internet connection.|Sin conexión a internet.|Keine Internetverbindung.|인터넷에 연결되어 있지 않습니다.|インターネットに接続されていません。
+Bir şeyler ters gitti, tekrar dener misin?|Something went wrong. Please try again.|Algo salió mal. Inténtalo de nuevo.|Etwas ist schiefgelaufen. Bitte versuche es erneut.|문제가 발생했습니다. 다시 시도해 주세요.|問題が発生しました。もう一度お試しください。
+⚠️ Sadece bu cihazda kaydedildi, buluta senkron OLMADI|⚠️ Saved on this device only — NOT synced to the cloud|⚠️ Guardado solo en este dispositivo — NO sincronizado|⚠️ Nur auf diesem Gerät gespeichert — NICHT synchronisiert|⚠️ 이 기기에만 저장됨 — 클라우드 동기화 안 됨|⚠️ この端末にのみ保存 — クラウド未同期
+Bu bölüm silinsin mi?|Delete this chapter?|¿Eliminar este capítulo?|Dieses Kapitel löschen?|이 챕터를 삭제할까요?|この章を削除しますか？
+Bu seri, içindeki tüm sezon ve bölümlerle birlikte silinsin mi?|Delete this series with all its seasons and chapters?|¿Eliminar esta serie con todas sus temporadas y capítulos?|Diese Serie mit allen Staffeln und Kapiteln löschen?|이 시리즈와 모든 시즌·챕터를 삭제할까요?|このシリーズをすべてのシーズンと章ごと削除しますか？
+Bu sezon ve içindeki tüm bölümler silinsin mi?|Delete this season and all its chapters?|¿Eliminar esta temporada y todos sus capítulos?|Diese Staffel mit allen Kapiteln löschen?|이 시즌과 모든 챕터를 삭제할까요?|このシーズンとすべての章を削除しますか？
+Bu yedek, bu cihazdaki mevcut verinin ÜZERİNE yazılacak. Emin misin?|This backup will OVERWRITE the data currently on this device. Are you sure?|Esta copia SOBRESCRIBIRÁ los datos actuales de este dispositivo. ¿Seguro?|Dieses Backup ÜBERSCHREIBT die aktuellen Daten auf diesem Gerät. Sicher?|이 백업은 현재 기기의 데이터를 덮어씁니다. 계속할까요?|このバックアップは端末の現在のデータを上書きします。よろしいですか？`;
+const DICT = {};
+I18N_RAW.split('\n').forEach(l=>{ const a = l.split('|'); DICT[a[0]] = {en:a[1], es:a[2]||a[1], de:a[3]||a[1], ko:a[4]||a[1], ja:a[5]||a[1]}; });
+const I18N_EXTRA2 = `Şifremi unuttum|Forgot password?|¿Olvidaste tu contraseña?|Passwort vergessen?|비밀번호를 잊으셨나요?|パスワードを忘れた場合
+Şifre sıfırlama bağlantısı gönderildi. E-postanı (ve spam klasörünü) kontrol et.|Password reset link sent. Check your email (and spam folder).|Enlace de restablecimiento enviado. Revisa tu correo (y la carpeta de spam).|Link zum Zurücksetzen gesendet. Prüfe dein Postfach (und den Spam-Ordner).|비밀번호 재설정 링크를 보냈습니다. 이메일(스팸함 포함)을 확인하세요.|パスワード再設定リンクを送信しました。メール（迷惑メールも）を確認してください。
+Önce yukarıya e-posta adresini yaz.|Enter your email address above first.|Primero escribe tu correo arriba.|Gib zuerst oben deine E-Mail-Adresse ein.|먼저 위에 이메일 주소를 입력하세요.|先に上にメールアドレスを入力してください。
+Bu e-posta ile kayıtlı hesap bulunamadı.|No account found with this email.|No hay ninguna cuenta con este correo.|Mit dieser E-Mail wurde kein Konto gefunden.|이 이메일로 가입된 계정이 없습니다.|このメールのアカウントが見つかりません。
+Çok fazla deneme yapıldı, biraz sonra tekrar dene.|Too many attempts. Please try again later.|Demasiados intentos. Inténtalo más tarde.|Zu viele Versuche. Bitte versuche es später erneut.|시도가 너무 많습니다. 잠시 후 다시 시도하세요.|試行回数が多すぎます。しばらくしてからお試しください。
+Kitaplığım|My library|Mi biblioteca|Meine Bibliothek|내 서재|マイライブラリ
++ Yeni seri|+ New series|+ Nueva serie|+ Neue Serie|+ 새 시리즈|+ 新しいシリーズ
+Son çalıştığın bölüm|Last chapter you worked on|Último capítulo en el que trabajaste|Zuletzt bearbeitetes Kapitel|마지막으로 작업한 챕터|最後に作業した章
+Devam eden seriler|Ongoing series|Series en curso|Laufende Serien|연재 중인 시리즈|連載中のシリーズ
+Tamamlananlar|Completed|Completadas|Abgeschlossen|완결|完結
+Ara verilenler|On hiatus|En pausa|Pausiert|휴재 중|休載中
+Bırakılanlar|Dropped|Abandonadas|Abgebrochen|중단됨|打ち切り
+Ana sayfa|Home|Inicio|Startseite|홈|ホーム
+← Ana sayfa|← Home|← Inicio|← Startseite|← 홈|← ホーム
+Yazmaya devam et|Continue writing|Seguir escribiendo|Weiterschreiben|이어서 쓰기|続きを書く
+Seri sayfası|Series page|Página de la serie|Serienseite|시리즈 페이지|シリーズページ
+Tüm seriler|All series|Todas las series|Alle Serien|모든 시리즈|すべてのシリーズ
+Henüz seri yok. Bir tane oluştur!|No series yet. Create one!|Aún no hay series. ¡Crea una!|Noch keine Serien. Erstelle eine!|아직 시리즈가 없습니다. 하나 만들어 보세요!|まだシリーズがありません。作成しましょう！
+Henüz bölüm yok|No chapters yet|Aún no hay capítulos|Noch keine Kapitel|아직 챕터가 없습니다|まだ章がありません
+Bölüm sonu|End of chapter|Fin del capítulo|Ende des Kapitels|챕터 끝|章の終わり
+Telif / yayımcı satırı|Copyright / publisher line|Copyright / editorial|Copyright / Verlagszeile|저작권 / 발행처 줄|著作権／発行元の行
+Künye (her satır ayrı)|Credits (one per line)|Créditos (uno por línea)|Impressum (eine Zeile pro Eintrag)|크레딧 (한 줄에 하나)|クレジット（1行に1つ）
+Çizer, çevirmen, editör...|Artist, translator, editor...|Ilustrador, traductor, editor...|Zeichner, Übersetzer, Lektor...|작화, 번역, 편집...|作画、翻訳、編集...
+Metin dili|Text language|Idioma del texto|Textsprache|글 언어|本文の言語
+✓ Tümünü düzelt|✓ Fix all|✓ Corregir todo|✓ Alles korrigieren|✓ 모두 고치기|✓ すべて修正
+Düzeltilen|Fixed|Corregidos|Korrigiert|수정됨|修正数
+⚙ Ayarlar|⚙ Settings|⚙ Ajustes|⚙ Einstellungen|⚙ 설정|⚙ 設定
+Çıkış tarihi, etiketler, durum|Release date, tags, status|Fecha, etiquetas, estado|Datum, Tags, Status|공개일, 태그, 상태|公開日、タグ、状態
+Seriyi indir (.txt)|Download series (.txt)|Descargar serie (.txt)|Serie herunterladen (.txt)|시리즈 다운로드 (.txt)|シリーズを保存 (.txt)
+Bulut senkron aktif|Cloud sync active|Sincronización en la nube activa|Cloud-Sync aktiv|클라우드 동기화 켜짐|クラウド同期オン
+Bulut|Cloud|Nube|Cloud|클라우드|クラウド
+Bu cihazda kayıtlı|Saved on this device|Guardado en este dispositivo|Auf diesem Gerät gespeichert|이 기기에 저장됨|この端末に保存済み
+Seri 1|Series 1|Serie 1|Serie 1|시리즈 1|シリーズ1`;
+const I18N_EXTRA = `Seri bilgisi|Series info|Info de la serie|Serieninfo|시리즈 정보|シリーズ情報
+Yazı türü|Writing type|Tipo de escritura|Schreibart|글 유형|執筆タイプ
+Roman / Light novel|Novel / Light novel|Novela / Novela ligera|Roman / Light Novel|소설 / 라이트 노벨|小説／ライトノベル
+Manga|Manga|Manga|Manga|만화|マンガ
+Yazar|Author|Autor|Autor|작가|作者
+Yazar adı|Author name|Nombre del autor|Name des Autors|작가 이름|作者名
+Türler (virgülle ayır)|Genres (comma separated)|Géneros (separados por comas)|Genres (durch Komma getrennt)|장르 (쉼표로 구분)|ジャンル（カンマ区切り）
+Aksiyon, fantezi, ...|Action, fantasy, ...|Acción, fantasía, ...|Action, Fantasy, ...|액션, 판타지, ...|アクション、ファンタジー、...
+Seri özeti|Series synopsis|Sinopsis de la serie|Serienzusammenfassung|시리즈 줄거리|シリーズのあらすじ
+Seri hakkında kısa bir tanıtım...|A short blurb about the series...|Una breve presentación de la serie...|Ein kurzer Klappentext zur Serie...|시리즈에 대한 짧은 소개...|シリーズの短い紹介文...
+Kaydet|Save|Guardar|Speichern|저장|保存
+Kapat|Close|Cerrar|Schließen|닫기|閉じる
+📖 Oku|📖 Read|📖 Leer|📖 Lesen|📖 읽기|📖 読む
+Önceki|Previous|Anterior|Zurück|이전|前へ
+Sonraki|Next|Siguiente|Weiter|다음|次へ`;
+I18N_EXTRA2.split('\n').forEach(l=>{ const a = l.split('|'); DICT[a[0]] = {en:a[1], es:a[2]||a[1], de:a[3]||a[1], ko:a[4]||a[1], ja:a[5]||a[1]}; });
+I18N_EXTRA.split('\n').forEach(l=>{ const a = l.split('|'); DICT[a[0]] = {en:a[1], es:a[2]||a[1], de:a[3]||a[1], ko:a[4]||a[1], ja:a[5]||a[1]}; });
+var LANG = localStorage.getItem('luna-lang') || 'en';
+const PW = {en:['words','min read','pages','panels'], es:['palabras','min de lectura','páginas','viñetas'], de:['Wörter','Min. Lesezeit','Seiten','Panels'], ko:['단어','분 읽기','페이지','컷'], ja:['語','分で読めます','ページ','コマ']};
+const PS = {en:['series','seasons','chapters done'], es:['series','temporadas','capítulos terminados'], de:['Serien','Staffeln','Kapitel fertig'], ko:['시리즈','시즌','챕터 완료'], ja:['シリーズ','シーズン','章 完了']};
+const PSE = {en:'Season', es:'Temporada', de:'Staffel', ko:'시즌', ja:'シーズン'};
+const PCP = {en:'chapters', es:'capítulos', de:'Kapitel', ko:'챕터', ja:'章'};
+const seasonName = (m, n)=>{ const o = PSE[LANG] + ' ' + n; return m[0] === m[0].toLocaleUpperCase('tr') ? o.toLocaleUpperCase(LANG) : o; };
+const PCH = {en:'Chapter', es:'Capítulo', de:'Kapitel', ko:'챕터', ja:'章'};
+const PDL = {en:'Download', es:'Descargar', de:'Herunterladen', ko:'다운로드', ja:'ダウンロード'};
+const PCO = {en:'Continue where you left off:', es:'Continuar donde lo dejaste:', de:'Dort weitermachen, wo du aufgehört hast:', ko:'이어서 작업하기:', ja:'続きから再開：'};
+const PATS = [
+  [/^(\d+) kelime · (\d+) dk okuma(?: · (\d+) sayfa · (\d+) panel)?$/, m=>{ const w = PW[LANG]; return m[1]+' '+w[0]+' · '+m[2]+' '+w[1]+(m[3] !== undefined ? ' · '+m[3]+' '+w[2]+' · '+m[4]+' '+w[3] : ''); }],
+  [/^(\d+) seri · (\d+) sezon · (\d+)\/(\d+) bölüm bitti$/, m=>{ const w = PS[LANG]; return m[1]+' '+w[0]+' · '+m[2]+' '+w[1]+' · '+m[3]+'/'+m[4]+' '+w[2]; }],
+  [/^(\d+) seri$/, m=>m[1]+' '+PS[LANG][0]],
+  [/^(.*) \/ (.*) \/ Bölüm ([\d.]+)$/, m=>tr(m[1])+' / '+tr(m[2])+' / '+PCH[LANG]+' '+m[3]],
+  [/^(\d+)\.?\s*sezon$/i, m=>seasonName(m, m[1])],
+  [/^sezon\s*(\d+)$/i, m=>seasonName(m, m[1])],
+  [/^(\d+) bölüm$/, m=>m[1]+' '+PCP[LANG]],
+  [/^(\d+) sezon$/, m=>m[1]+' '+PS[LANG][1]],
+  [/^Luna Studio · v([\d.]+)(?: · (.+))?$/, m=>'Luna Studio · v'+m[1]+(m[2] ? ' · '+tr(m[2]) : '')],
+  [/^↓ (.*) serisini indir \(\.txt\)$/, m=>'↓ '+PDL[LANG]+' '+m[1]+' (.txt)'],
+  [/^Kaldığın yerden devam et: (.*)$/, m=>PCO[LANG]+' '+m[1]],
+  [/^↓ (.*) EPUB$/, m=>'↓ '+PDL[LANG]+' '+m[1]+' EPUB'],
+  [/^([\d.]+)\. (.+)$/, m=>{ const r = tr(m[2]); return r !== m[2] ? m[1]+'. '+r : m[0]; }]
+];
+function tr(str){
+  if(LANG === 'tr' || !str) return str;
+  const key = str.trim(), d = DICT[key];
+  if(d) return str.replace(key, d[LANG]);
+  for(const [re, fn] of PATS){ const m = key.match(re); if(m) return str.replace(key, fn(m)); }
+  return str;
+}
+function T(x){ return tr(x); }
+const SKIP_SEL = 'script,style,textarea,input,#editor';
+const NREC = new WeakMap(), AREC = new WeakMap(), ATTRS = ['placeholder','title','aria-label'];
+function trText(n){
+  const p = n.parentElement; if(!p || p.closest(SKIP_SEL)) return;
+  let r = NREC.get(n);
+  if(!(r && n.data === r.t)){ r = {o:n.data, t:n.data}; NREC.set(n, r); }
+  const t = tr(r.o);
+  if(t !== n.data) n.data = t;
+  r.t = n.data;
+}
+function trAttrs(el){
+  if(!el.hasAttribute) return;
+  let rec = AREC.get(el); if(!rec){ rec = {}; AREC.set(el, rec); }
+  for(const a of ATTRS){
+    if(!el.hasAttribute(a)) continue;
+    const cur = el.getAttribute(a); let r = rec[a];
+    if(!(r && cur === r.t)){ r = rec[a] = {o:cur, t:cur}; }
+    const t = tr(r.o);
+    if(t !== cur) el.setAttribute(a, t);
+    r.t = el.getAttribute(a);
+  }
+}
+function i18nWalk(root){
+  if(root.nodeType === 3){ trText(root); return; }
+  if(root.nodeType !== 1) return;
+  trAttrs(root);
+  root.querySelectorAll('[placeholder],[title],[aria-label]').forEach(trAttrs);
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let n;
+  while((n = w.nextNode())) trText(n);
+}
+const MO_OPTS = {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:ATTRS};
+const mo = new MutationObserver((ms)=>{
+  mo.disconnect();
+  ms.forEach(m=>{
+    if(m.type === 'childList') m.addedNodes.forEach(i18nWalk);
+    else if(m.type === 'characterData') trText(m.target);
+    else trAttrs(m.target);
+  });
+  mo.observe(document.body, MO_OPTS);
+});
+function applyLang(l, rerender){
+  LANG = l; localStorage.setItem('luna-lang', l);
+  document.documentElement.lang = l;
+  mo.disconnect(); i18nWalk(document.body); mo.observe(document.body, MO_OPTS);
+  if(rerender && dataLoaded && typeof renderMain === 'function') renderMain();
+}
+(function(){
+  const sel = document.getElementById('langSelect'); sel.value = LANG;
+  sel.onchange = ()=>applyLang(sel.value, true);
+  applyLang(LANG, false);
+})();
+
+/* Performans modu */
+function applyPerf(){
+  const p = localStorage.getItem('luna-perf') || 'auto';
+  const low = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+  document.body.classList.toggle('lite', p === 'lite' || (p === 'auto' && low));
+}
+(function(){
+  const sel = document.getElementById('perfSelect'); sel.value = localStorage.getItem('luna-perf') || 'auto';
+  sel.onchange = ()=>{ localStorage.setItem('luna-perf', sel.value); applyPerf(); };
+  applyPerf();
+})();
+
+/* Otomatik düzeltme (tarayıcı yazım denetiminden bağımsız) */
+const TYPOS = {
+  tr:{'bişey':'bir şey','bişi':'bir şey','yinede':'yine de','yada':'ya da','belkide':'belki de','çünki':'çünkü','olucak':'olacak','yapıcak':'yapacak','gidicek':'gidecek','degil':'değil','deil':'değil','cok':'çok','icin':'için','simdi':'şimdi','guzel':'güzel','cunku':'çünkü','tesekkurler':'teşekkürler','birsürü':'bir sürü','birşey':'bir şey','birsey':'bir şey','herşey':'her şey','hersey':'her şey','hiçbirşey':'hiçbir şey','herkez':'herkes','yanlız':'yalnız','yalnış':'yanlış','teşekür':'teşekkür','teşekkurler':'teşekkürler'},
+  en:{'teh':'the','adn':'and','recieve':'receive','definately':'definitely','seperate':'separate','occured':'occurred','wich':'which','becuase':'because','beleive':'believe','freind':'friend','wierd':'weird','untill':'until','thier':'their','alot':'a lot','im':"I'm",'ive':"I've",'dont':"don't",'cant':"can't",'wont':"won't",'didnt':"didn't",'doesnt':"doesn't",'isnt':"isn't",'wasnt':"wasn't",'couldnt':"couldn't",'wouldnt':"wouldn't",'thats':"that's",'whats':"what's",'youre':"you're",'theyre':"they're",'i':'I'},
+  es:{'tambien':'también','ademas':'además','despues':'después','asi':'así','aqui':'aquí','alli':'allí','facil':'fácil','dificil':'difícil','ultimo':'último','numero':'número'},
+  de:{'vieleicht':'vielleicht','ausserdem':'außerdem','strasse':'Straße','garnicht':'gar nicht','vorallem':'vor allem','nähmlich':'nämlich','standart':'Standard'}
+};
+function writingLang(ser, text){
+  if(ser && ser.wlang) return ser.wlang;
+  const t = text || '';
+  if(/[ıİşŞğĞ]/.test(t)) return 'tr';
+  if(/[ñ¿¡]/.test(t)) return 'es';
+  if(/[ßä]/.test(t)) return 'de';
+  if(/[\u3040-\u30ff]/.test(t)) return 'ja';
+  if(/[\uac00-\ud7af]/.test(t)) return 'ko';
+  return LANG;
+}
+function tryAutoCorrect(){
+  const ed = document.getElementById('editor'); if(!ed) return;
+  const sel = getSelection(); if(!sel.rangeCount || !sel.isCollapsed) return;
+  const n = sel.anchorNode; if(!n || n.nodeType !== 3 || !ed.contains(n)) return;
+  const off = sel.anchorOffset, ch = n.data[off - 1];
+  if(!ch || !/[\s\u00a0.,!?;:]/.test(ch)) return;
+  const wl = writingLang(getSeries(currentSeriesId), ed.textContent.slice(-1500));
+  if(wl === 'ko' || wl === 'ja') return;
+  const before = n.data.slice(0, off - 1);
+  const m = before.match(/([\p{L}'’]+)$/u); if(!m) return;
+  const word = m[1], start = before.length - word.length;
+  let out = word;
+  const fix = (TYPOS[wl] || {})[word.toLocaleLowerCase(wl)];
+  if(fix) out = word[0] !== word[0].toLocaleLowerCase(wl) ? fix[0].toLocaleUpperCase(wl) + fix.slice(1) : fix;
+  if(/^\p{Ll}/u.test(out)){
+    const pre = before.slice(0, start).replace(/[\s\u00a0]+$/, '');
+    const atStart = pre === '' && (!n.previousSibling || n.previousSibling.nodeName === 'BR');
+    if(atStart || /[.!?…]$/.test(pre)) out = out[0].toLocaleUpperCase(wl) + out.slice(1);
+  }
+  if(out === word) return;
+  const r = document.createRange(); r.setStart(n, start); r.setEnd(n, off);
+  sel.removeAllRanges(); sel.addRange(r);
+  document.execCommand('insertText', false, out + ch);
+}
+function fixAll(ed, ser){
+  const wl = writingLang(ser, ed.textContent);
+  if(wl === 'ko' || wl === 'ja') return 0;
+  const map = TYPOS[wl] || {}; let count = 0;
+  const nodes = [], w = document.createTreeWalker(ed, NodeFilter.SHOW_TEXT); let x;
+  while((x = w.nextNode())) nodes.push(x);
+  nodes.forEach(n=>{
+    if(n.parentElement.closest('rt')) return;
+    let t = n.data;
+    t = t.replace(/[\p{L}'’]+/gu, (word)=>{ const f = map[word.toLocaleLowerCase(wl)]; if(!f) return word; count++; return word[0] !== word[0].toLocaleLowerCase(wl) ? f[0].toLocaleUpperCase(wl) + f.slice(1) : f; });
+    t = t.replace(/([.!?…]\s+)(\p{Ll})/gu, (mm, a, b)=>{ count++; return a + b.toLocaleUpperCase(wl); });
+    if(!n.previousSibling || n.previousSibling.nodeName === 'BR') t = t.replace(/^(\s*)(\p{Ll})/u, (mm, a, b)=>{ count++; return a + b.toLocaleUpperCase(wl); });
+    if(t !== n.data) n.data = t;
+  });
+  return count;
+}
+
+/* ================= BOOT ================= */
+const splashStart = Date.now();
+function finishSplash(cb){
+  const elapsed = Date.now() - splashStart;
+  const remain = Math.max(0, 1400 - elapsed);
+  setTimeout(()=>{ hideSplash(); if(cb) cb(); }, remain);
+}
+
+if(fbAuth){
+  fbAuth.onAuthStateChanged(async (user)=>{
+    if(user){
+      localStorage.removeItem('luna-guest');
+      currentUser = user;
+      hideAuthScreen();
+      await loadData();
+      renderAccountRow();
+      finishSplash();
+    }else if(localStorage.getItem('luna-guest') === '1'){
+      currentUser = null;
+      await loadData();
+      renderAccountRow();
+      finishSplash();
+    }else{
+      finishSplash(showAuthScreen);
+    }
+  });
+}else{
+  currentUser = null;
+  loadData().then(()=>{ renderAccountRow(); finishSplash(); });
+}
+document.getElementById('splash').addEventListener('click', hideSplash);
+</script>
+</body>
+</html>

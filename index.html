@@ -1676,9 +1676,51 @@
   .nt-item:hover{ border-color:var(--accent); }
   .nt-ic{ font-size:20px; } .nt-tx{ display:flex; flex-direction:column; gap:2px; min-width:0; }
   .nt-tx b{ font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .nt-tx span{ font-size:12.5px; } .nt-tx small{ font-size:11px; color:var(--silver-dim); }
+
+  /* ============ v4.1: Netflix görünümü ============ */
+  body[data-theme="cinema"]{ --void:#141414; --ink:#0b0b0b; --panel:#181818; --panel-2:#222; --line:#2f2f2f; --accent:#e50914; --silver:#fff; --silver-dim:#b3b3b3; --g-bg:#181818; --g-bd:#333; --glass:#181818; }
+  body[data-theme="cinema"], body[data-theme="cinema"] :is(button,input,select,textarea,.nf-card b,.nf-row h3,.nf-info h2,.brand-text .b1,.series-title){ font-family:"Netflix Sans","Helvetica Neue",Helvetica,Arial,sans-serif; font-style:normal; }
+  body[data-theme="cinema"] .brand-text .b1{ color:#e50914; font-weight:900; letter-spacing:.04em; text-transform:uppercase; font-size:22px; }
+  body[data-theme="cinema"] :is(.fmt-btn,.new-series-btn,.pub-nav-btn,.auth-btn,.auth-input,.status-opt,.modal,.nt-item,.nf-sbox,.nf-fbtn,.nf-bell,.nf-opt,.series-head,.note-card,.char-card,.img-card){ border-radius:4px; backdrop-filter:none; -webkit-backdrop-filter:none; box-shadow:none; }
+  body[data-theme="cinema"] :is(.new-series-btn,#exportBtn,.auth-btn-primary,.fmt-btn.primary,.episode.active){ background:#e50914; color:#fff; border-color:#e50914; background-image:none; }
+  body[data-theme="cinema"] .nfp{ background:#141414; padding-bottom:80px; }
+  body[data-theme="cinema"] .nf-top{ position:sticky; top:0; z-index:20; padding:14px 4vw; background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(20,20,20,0)); }
+  body[data-theme="cinema"] .nf-tools{ padding:6px 4vw 10px; }
+  body[data-theme="cinema"] .nf-tools .home-tabs{ background:none; border:0; box-shadow:none; padding:0; gap:18px; border-radius:0; }
+  body[data-theme="cinema"] .nf-tools .home-tabs button{ padding:6px 0; border-radius:0; background:none !important; box-shadow:none !important; color:#e5e5e5; font-weight:400; font-size:14px; }
+  body[data-theme="cinema"] .nf-tools .home-tabs button.on{ color:#fff; font-weight:700; }
+  body[data-theme="cinema"] .nf-sbox,body[data-theme="cinema"] .nf-fbtn{ background:rgba(0,0,0,.75); border:1px solid #fff6; height:38px; }
+  body[data-theme="cinema"] .nf-hero{ margin:0; border-radius:0; height:clamp(420px,72vh,680px); box-shadow:none; margin-top:-64px; }
+  body[data-theme="cinema"] .nf-shade{ background:linear-gradient(77deg,rgba(0,0,0,.7) 0,rgba(0,0,0,0) 85%), linear-gradient(0deg,#141414 0,rgba(20,20,20,0) 38%); }
+  body[data-theme="cinema"] .nf-info{ left:4vw; bottom:18%; max-width:520px; }
+  body[data-theme="cinema"] .nf-info h2{ font-weight:900; letter-spacing:-.01em; text-shadow:2px 2px 4px rgba(0,0,0,.45); }
+  body[data-theme="cinema"] .nf-chips .chip{ background:none; border:0; padding:0; color:#46d369; font-weight:700; }
+  body[data-theme="cinema"] .nf-chips .chip.ghost{ color:#fff; border:1px solid #fff8; padding:0 6px; }
+  body[data-theme="cinema"] .nf-btn{ border-radius:4px; padding:9px 24px; font-size:16px; font-weight:700; background:rgba(109,109,110,.7); backdrop-filter:none; }
+  body[data-theme="cinema"] .nf-btn.pri{ background:#fff; color:#000; }
+  body[data-theme="cinema"] .nf-btn:hover{ transform:none; background:rgba(109,109,110,.45); } body[data-theme="cinema"] .nf-btn.pri:hover{ background:rgba(255,255,255,.75); }
+  body[data-theme="cinema"] .nf-nav{ right:0; bottom:22%; } body[data-theme="cinema"] .nf-dots{ display:none; }
+  body[data-theme="cinema"] .nf-row h3{ margin:22px 4vw 0; font-family:inherit; font-size:20px; font-weight:700; color:#e5e5e5; }
+  body[data-theme="cinema"] .nf-rail{ gap:6px; padding-top:10px; }
+  body[data-theme="cinema"] .nf-poster{ border-radius:4px; border:0; box-shadow:none; }
+  body[data-theme="cinema"] .nf-card b{ font-weight:500; font-size:13px; color:#e5e5e5; } body[data-theme="cinema"] .nf-card small{ color:#a3a3a3; }
+  body[data-theme="cinema"] .nf-card{ transition:transform .25s cubic-bezier(.5,0,.1,1); }
+  @media (hover:hover){ body[data-theme="cinema"] .nf-card:hover{ transform:scale(1.12); z-index:8; } body[data-theme="cinema"] .nf-card:hover .nf-poster{ box-shadow:0 8px 28px rgba(0,0,0,.8); } }
+  body[data-theme="cinema"] .nf-ov{ background:linear-gradient(0deg,rgba(0,0,0,.75),rgba(0,0,0,0) 60%); align-items:flex-end; justify-content:flex-start; padding:10px; }
+  body[data-theme="cinema"] .nf-ov i{ width:32px; height:32px; border:2px solid #fff; background:#fff; }
+  body[data-theme="cinema"] .nf-rank{ -webkit-text-stroke:3px #595959; font-family:inherit; }
+  body[data-theme="cinema"] .nf-arr{ border-radius:0; background:rgba(20,20,20,.5); top:10px; bottom:20px; }
+  body[data-theme="cinema"] .nf-grid{ gap:34px 6px; }
+  body[data-theme="cinema"] .new-badge{ border-radius:2px; background:#e50914; color:#fff; }
+  body[data-theme="cinema"] .bdg{ background:#e50914; }
+  /* bildirim banner'ı (canlı) */
+  #ntBanners{ position:fixed; top:16px; right:16px; z-index:400; display:flex; flex-direction:column; gap:8px; width:min(340px,calc(100vw - 32px)); pointer-events:none; }
+  .nt-banner{ pointer-events:auto; display:flex; gap:12px; align-items:center; text-align:left; padding:12px 14px; border-radius:4px; border:1px solid #333; border-left:4px solid #e50914; background:#181818; color:#fff; font:inherit; cursor:pointer; box-shadow:0 10px 30px rgba(0,0,0,.7); transform:translateX(120%); opacity:0; transition:transform .35s cubic-bezier(.2,.8,.2,1), opacity .35s; }
+  .nt-banner.in{ transform:none; opacity:1; }
+  .nt-banner .nt-tx b{ font-size:14px; } .nt-banner .nt-tx span{ font-size:12.5px; color:#b3b3b3; }
 </style>
 </head>
-<body data-theme="luna" data-bg-anim="dots">
+<body data-theme="cinema" data-bg-anim="none">
 
 <div class="splash" id="splash">
   <div class="ls-sky"></div>
@@ -1847,7 +1889,7 @@ let autoOn = localStorage.getItem('luna-autocorrect') !== '0';
 let currentFont = 'sans';
 let noMotion = false;
 let currentBgAnim = 'dots';
-let currentTheme = 'luna';
+let currentTheme = 'cinema';
 let pendingCharPhotoId = null;
 
 const STORAGE_KEY = 'luna-studio:project';
@@ -2496,7 +2538,7 @@ function renderMain(){
         <button class="status-opt devam ${ep.status!=='bitti'?'active devam':''}" id="btnDevam">Devam ediyor</button>
         <button class="status-opt bitti ${ep.status==='bitti'?'active bitti':''}" id="btnBitti">Bitti</button>
       </div><span>Sıra</span><button class="fmt-btn" id="moveUp" title="Bölümü yukarı taşı">↑</button><button class="fmt-btn" id="moveDown" title="Bölümü aşağı taşı">↓</button></div>
-      <div class="info-line"><button class="fmt-btn" id="readBtn">📖 Oku</button><button class="fmt-btn" id="serInfoBtn">Seri bilgisi</button></div>
+      <div class="info-line"><button class="fmt-btn" id="readBtn">📖 Oku</button><button class="fmt-btn" id="serInfoBtn">Seri bilgisi</button><button class="fmt-btn" id="serPageBtn" title="Bu serinin sayfasına git">🎬 Seri sayfası</button></div>
     </div>
     <div class="tabs">
       <div class="tab ${currentTab==='script'?'active':''}" data-tab="script">Senaryo</div>
@@ -2729,6 +2771,7 @@ function renderMain(){
   if(localStorage.getItem('luna-info') === '1') ip.classList.add('open');
   document.getElementById('infoBtn').onclick = ()=>{ ip.classList.toggle('open'); localStorage.setItem('luna-info', ip.classList.contains('open') ? '1' : '0'); };
   document.getElementById('serInfoBtn').onclick = ()=>openSeriesInfo(ser.id);
+  document.getElementById('serPageBtn').onclick = ()=>{ try{ saveNow(); }catch(_){} homeSeriesId = ser.id; currentEpisodeId = null; renderTree(); renderMain(); if(window.innerWidth <= 820) closeSidebar(); };
   document.getElementById('readBtn').onclick = ()=>openReader(ser.id, ep.id);
   const einner = document.querySelector('.editor-inner');
   if(einner){
@@ -4586,6 +4629,65 @@ if(fbAuth){
   loadData().then(()=>{ renderAccountRow(); socInit(); finishSplash(); });
 }
 document.getElementById('splash').addEventListener('click', hideSplash);
+
+/* ===== v4.1: canlı bildirim (yenilemeden düşer) + bildirim sesi ===== */
+let ntCtx=null, ntUnsubs={}, ntFirst={}, ntPoll=null;
+function ntUnlock(){ try{ ntCtx = ntCtx || new (window.AudioContext||window.webkitAudioContext)(); if(ntCtx.state==='suspended') ntCtx.resume(); }catch(e){} }
+['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev, ntUnlock, {passive:true}));
+function ntSound(){
+  try{
+    ntUnlock(); if(!ntCtx || ntCtx.state!=='running') return;
+    const t=ntCtx.currentTime, g=ntCtx.createGain(); g.connect(ntCtx.destination);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.28,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.9);
+    [[880,0],[1318.5,0.14]].forEach(([f,d])=>{ const o=ntCtx.createOscillator(); o.type='sine'; o.frequency.value=f; o.connect(g); o.start(t+d); o.stop(t+d+0.7); });
+  }catch(e){}
+}
+function ntBanner(n){
+  let box=document.getElementById('ntBanners'); if(!box){ box=document.createElement('div'); box.id='ntBanners'; document.body.appendChild(box); }
+  const el=document.createElement('button'); el.className='nt-banner';
+  el.innerHTML='<span class="nt-ic">🔔</span><span class="nt-tx"><b>'+escapeHtml(n.title||'')+'</b><span>'+n.n+' yeni bölüm eklendi</span></span>';
+  el.onclick=()=>{ el.remove(); openPub(n.pid); };
+  box.appendChild(el); requestAnimationFrame(()=>el.classList.add('in'));
+  setTimeout(()=>{ el.classList.remove('in'); setTimeout(()=>el.remove(),400); }, 7000);
+  try{ if('Notification' in window && Notification.permission==='granted' && document.hidden) new Notification(n.title||'Luna Studio',{body:n.n+' yeni bölüm eklendi'}); }catch(e){}
+}
+function ntHandle(id, d){
+  const f=soc.follow[id]; if(!f||!f.on) return;
+  const cc=d.chCount||0, known=f.known||0;
+  if(d.title && f.title!==d.title) f.title=d.title;
+  if(cc>known){
+    const nid=id+':'+cc, mine=currentUser && currentUser.uid===d.owner;
+    f.known=cc;
+    if(!mine && !soc.notifs.some(x=>x.id===nid)){
+      const n={id:nid, pid:id, title:d.title||f.title, n:cc-known, at:Date.now(), read:false};
+      soc.notifs.unshift(n); soc.notifs=soc.notifs.slice(0,60);
+      socSave(); socBadge(); ntSound(); ntBanner(n);
+    }else socSave();
+  }else if(cc<known){ f.known=cc; socSave(); }
+}
+function ntWatch(){
+  if(!fbDb) return;
+  const want=new Set(followedIds().slice(0,40));
+  Object.keys(ntUnsubs).forEach(id=>{ if(!want.has(id)){ try{ ntUnsubs[id](); }catch(e){} delete ntUnsubs[id]; } });
+  want.forEach(id=>{
+    if(ntUnsubs[id]) return;
+    try{
+      ntUnsubs[id]=fbDb.collection(PUBC).doc(id).onSnapshot(sn=>{ if(sn.exists) ntHandle(id, sn.data()); }, ()=>{});
+    }catch(e){}
+  });
+}
+const _socInit41=socInit;
+socInit=async function(){
+  await _socInit41();
+  ntWatch();
+  if(!ntPoll){ ntPoll=setInterval(ntWatch, 15000); }
+  try{ if('Notification' in window && Notification.permission==='default') document.addEventListener('click', ()=>{ try{ Notification.requestPermission(); }catch(e){} }, {once:true}); }catch(e){}
+};
+const _setFollow41=setFollow;
+setFollow=function(s,on){ _setFollow41(s,on); setTimeout(ntWatch,50); };
+
+const _socBadge41=socBadge;
+socBadge=function(){ _socBadge41(); const m=document.querySelector('.modal-back .nt-list'); if(m){ const L=soc.notifs.slice().sort((a,b)=>b.at-a.at); m.innerHTML=L.map(n=>`<button class="nt-item${n.read?'':' un'}" data-p="${escapeAttr(n.pid)}"><span class="nt-ic">📖</span><span class="nt-tx"><b>${escapeHtml(n.title||'')}</b><span>${n.n} yeni bölüm eklendi</span><small>${tsDate(n.at)}</small></span></button>`).join(''); m.querySelectorAll('.nt-item').forEach(b=>b.onclick=()=>{ soc.notifs.forEach(x=>{ if(x.pid===b.dataset.p) x.read=true; }); socSave(); _socBadge41(); document.querySelector('.modal-back').remove(); openPub(b.dataset.p); }); } };
 </script>
 </body>
 </html>
